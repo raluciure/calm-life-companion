@@ -5,6 +5,7 @@ export type ItemCategory = "health" | "errand" | "appointment" | "personal";
 export interface TimelineItemData {
   id: string;
   time?: string;
+  endTime?: string;
   title: string;
   emoji: string;
   category: ItemCategory;
