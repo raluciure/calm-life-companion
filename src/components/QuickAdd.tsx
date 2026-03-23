@@ -5,6 +5,7 @@ import type { ItemCategory, TimelineItemData } from "./TimelineItem";
 
 interface QuickAddProps {
   onAdd: (item: TimelineItemData) => void;
+  dateLabel?: string;
 }
 
 // Simple keyword-based categorization
@@ -30,7 +31,7 @@ function parseInput(text: string): { title: string; emoji: string; category: Ite
   return { title: titleWithoutTime || text, emoji: "✨", category: "personal", time };
 }
 
-const QuickAdd = ({ onAdd }: QuickAddProps) => {
+const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
   const [value, setValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -62,7 +63,7 @@ const QuickAdd = ({ onAdd }: QuickAddProps) => {
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder="Type anything... &quot;buy oat milk&quot; or &quot;dentist 3pm&quot;"
+        placeholder={dateLabel ? `Add to ${dateLabel}...` : `Type anything... "buy oat milk" or "dentist 3pm"`}
         className="flex-1 bg-transparent text-[15px] font-body text-foreground placeholder:text-muted-foreground/60 outline-none"
       />
       {value.trim() && (

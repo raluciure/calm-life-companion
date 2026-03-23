@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { format, isToday } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import Greeting from "@/components/Greeting";
@@ -6,13 +7,20 @@ import TimelineItem, { type TimelineItemData } from "@/components/TimelineItem";
 import QuickAdd from "@/components/QuickAdd";
 import TomorrowPreview from "@/components/TomorrowPreview";
 import FreeTimeMessage from "@/components/FreeTimeMessage";
+import DateNavigator from "@/components/DateNavigator";
 import AuthGate from "@/components/AuthGate";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 
+const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
+
 const TodayView = () => {
-  const { data: items = [], isLoading } = useItems();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const dateStr = toDateStr(selectedDate);
+  const viewingToday = isToday(selectedDate);
+
+  const { data: items = [], isLoading } = useItems(dateStr);
   const { data: tomorrowItems = [] } = useTomorrowItems();
   const addItem = useAddItem();
   const toggleItem = useToggleItem();
@@ -28,6 +36,7 @@ const TodayView = () => {
       emoji: newItem.emoji,
       category: newItem.category,
       time: newItem.time || null,
+      date: dateStr,
     });
   };
 
@@ -39,7 +48,6 @@ const TodayView = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-5 py-10 space-y-8">
-        {/* Header with sign out */}
         <div className="flex justify-end">
           <button
             onClick={handleSignOut}
@@ -51,11 +59,15 @@ const TodayView = () => {
 
         <Greeting />
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-          <h2 className="text-xs font-body font-medium uppercase tracking-widest text-muted-foreground mb-4 px-1">
-            Today
-          </h2>
+        {/* Date Navigator */}
+        <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
+        <motion.div
+          key={dateStr}
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           {isLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
@@ -70,9 +82,9 @@ const TodayView = () => {
               {untimedItems.map((item, i) => (
                 <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} />
               ))}
-              {items.length === 0 && !isLoading && (
+              {items.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground/60 font-body italic py-8">
-                  A fresh start — add something below ✨
+                  {viewingToday ? "A fresh start — add something below ✨" : "Nothing planned — keep it open 🌿"}
                 </p>
               )}
             </div>
@@ -80,9 +92,9 @@ const TodayView = () => {
           {items.length > 0 && <FreeTimeMessage />}
         </motion.div>
 
-        <QuickAdd onAdd={handleAdd} />
+        <QuickAdd onAdd={handleAdd} dateLabel={viewingToday ? undefined : format(selectedDate, "MMM d")} />
 
-        <TomorrowPreview items={tomorrowItems} />
+        {viewingToday && <TomorrowPreview items={tomorrowItems} />}
 
         <p className="text-center text-xs text-muted-foreground/40 font-body pt-4">hush</p>
       </div>
