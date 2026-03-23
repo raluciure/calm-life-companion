@@ -6,7 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 type DbItem = Database["public"]["Tables"]["items"]["Row"];
 type DbInsert = Database["public"]["Tables"]["items"]["Insert"];
 
-const toTimelineItem = (row: DbItem): TimelineItemData => ({
+export const toTimelineItem = (row: DbItem): TimelineItemData => ({
   id: row.id,
   time: row.time || undefined,
   endTime: row.end_time || undefined,
@@ -40,6 +40,36 @@ export function useItems(date?: string) {
   });
 }
 
+export interface DayItems {
+  date: string;
+  items: TimelineItemData[];
+}
+
+export function useItemsRange(startDate: string, endDate: string) {
+  return useQuery({
+    queryKey: ["items-range", startDate, endDate],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("items")
+        .select("*")
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: true })
+        .order("time", { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      
+      // Group by date
+      const grouped: Record<string, TimelineItemData[]> = {};
+      for (const row of data || []) {
+        const d = row.date;
+        if (!grouped[d]) grouped[d] = [];
+        grouped[d].push(toTimelineItem(row));
+      }
+      return grouped;
+    },
+  });
+}
+
 export function useTomorrowItems() {
   return useItems(tomorrowStr());
 }
@@ -61,6 +91,7 @@ export function useAddItem() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: ["items-range"] });
     },
   });
 }
@@ -78,6 +109,7 @@ export function useToggleItem() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: ["items-range"] });
     },
   });
 }
