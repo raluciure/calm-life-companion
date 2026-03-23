@@ -9,26 +9,41 @@ interface QuickAddProps {
 }
 
 // Simple keyword-based categorization
-function parseInput(text: string): { title: string; emoji: string; category: ItemCategory; time?: string } {
+function parseInput(text: string): { title: string; emoji: string; category: ItemCategory; time?: string; endTime?: string } {
   const lower = text.toLowerCase();
 
-  // Try to extract time (e.g., "3pm", "11:00", "9:30am")
-  const timeMatch = lower.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
-  const time = timeMatch ? timeMatch[1].replace(/\s/g, "").toUpperCase().replace(/(\d)(AM|PM)/, "$1 $2") : undefined;
-  const titleWithoutTime = text.replace(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i, "").trim();
+  // Try to extract time range (e.g., "9am to 6pm", "9am-5pm", "9:00am - 6:00pm")
+  const rangeMatch = lower.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))\s*(?:to|-|–)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
+  let time: string | undefined;
+  let endTime: string | undefined;
+  let titleCleaned = text;
+
+  if (rangeMatch) {
+    time = rangeMatch[1].replace(/\s/g, "").toUpperCase().replace(/(\d)(AM|PM)/, "$1 $2");
+    endTime = rangeMatch[2].replace(/\s/g, "").toUpperCase().replace(/(\d)(AM|PM)/, "$1 $2");
+    titleCleaned = text.replace(rangeMatch[0], "").trim();
+  } else {
+    // Single time
+    const timeMatch = lower.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
+    time = timeMatch ? timeMatch[1].replace(/\s/g, "").toUpperCase().replace(/(\d)(AM|PM)/, "$1 $2") : undefined;
+    titleCleaned = time ? text.replace(/(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i, "").trim() : text;
+  }
+
+  // Clean up extra dashes/connectors left over
+  titleCleaned = titleCleaned.replace(/^\s*[-–—]\s*/, "").replace(/\s*[-–—]\s*$/, "").trim();
 
   // Categorize
   if (/vitamin|medicine|pill|health|doctor|period|track|water|sleep|exercise|workout/i.test(lower)) {
-    return { title: titleWithoutTime, emoji: "💊", category: "health", time };
+    return { title: titleCleaned, emoji: "💊", category: "health", time, endTime };
   }
   if (/buy|grocery|groceries|shop|store|pick up|errand|milk|bread|eggs/i.test(lower)) {
-    return { title: titleWithoutTime, emoji: "🛒", category: "errand", time };
+    return { title: titleCleaned, emoji: "🛒", category: "errand", time, endTime };
   }
-  if (/dentist|appointment|meeting|call|visit|doctor|interview/i.test(lower)) {
-    return { title: titleWithoutTime, emoji: "📅", category: "appointment", time };
+  if (/dentist|appointment|meeting|call|visit|doctor|interview|work/i.test(lower)) {
+    return { title: titleCleaned, emoji: "📅", category: "appointment", time, endTime };
   }
 
-  return { title: titleWithoutTime || text, emoji: "✨", category: "personal", time };
+  return { title: titleCleaned || text, emoji: "✨", category: "personal", time, endTime };
 }
 
 const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
