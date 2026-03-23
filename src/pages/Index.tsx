@@ -36,6 +36,7 @@ const TodayView = () => {
       emoji: newItem.emoji,
       category: newItem.category,
       time: newItem.time || null,
+      end_time: newItem.endTime || null,
       date: dateStr,
     });
   };
