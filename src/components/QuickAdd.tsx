@@ -31,7 +31,7 @@ function parseInput(text: string): { title: string; emoji: string; category: Ite
   return { title: titleWithoutTime || text, emoji: "✨", category: "personal", time };
 }
 
-const QuickAdd = ({ onAdd }: QuickAddProps) => {
+const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
   const [value, setValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
