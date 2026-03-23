@@ -5,6 +5,7 @@ import type { ItemCategory, TimelineItemData } from "./TimelineItem";
 
 interface QuickAddProps {
   onAdd: (item: TimelineItemData) => void;
+  dateLabel?: string;
 }
 
 // Simple keyword-based categorization
