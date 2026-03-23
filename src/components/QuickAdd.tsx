@@ -63,7 +63,7 @@ const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder="Type anything... &quot;buy oat milk&quot; or &quot;dentist 3pm&quot;"
+        placeholder={dateLabel ? `Add to ${dateLabel}...` : `Type anything... "buy oat milk" or "dentist 3pm"`}
         className="flex-1 bg-transparent text-[15px] font-body text-foreground placeholder:text-muted-foreground/60 outline-none"
       />
       {value.trim() && (
