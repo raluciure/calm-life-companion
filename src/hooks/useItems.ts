@@ -9,6 +9,7 @@ type DbInsert = Database["public"]["Tables"]["items"]["Insert"];
 const toTimelineItem = (row: DbItem): TimelineItemData => ({
   id: row.id,
   time: row.time || undefined,
+  endTime: row.end_time || undefined,
   title: row.title,
   emoji: row.emoji,
   category: row.category,
