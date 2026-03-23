@@ -39,8 +39,10 @@ const TimelineItem = ({ item, index, onToggle }: TimelineItemProps) => {
         ${style.bg}`}
     >
       {/* Time */}
-      <span className="w-14 text-sm font-body text-muted-foreground tabular-nums shrink-0">
-        {item.time || ""}
+      <span className="w-24 text-sm font-body text-muted-foreground tabular-nums shrink-0">
+        {item.time ? (
+          item.endTime ? `${item.time} – ${item.endTime}` : item.time
+        ) : ""}
       </span>
 
       {/* Dot */}
