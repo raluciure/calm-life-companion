@@ -21,6 +21,7 @@ export type Database = {
           date: string
           done: boolean
           emoji: string
+          end_time: string | null
           id: string
           time: string | null
           title: string
@@ -33,6 +34,7 @@ export type Database = {
           date?: string
           done?: boolean
           emoji?: string
+          end_time?: string | null
           id?: string
           time?: string | null
           title: string
@@ -45,6 +47,7 @@ export type Database = {
           date?: string
           done?: boolean
           emoji?: string
+          end_time?: string | null
           id?: string
           time?: string | null
           title?: string
