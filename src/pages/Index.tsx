@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { format, isToday, addWeeks, subWeeks, addMonths, subMonths } from "date-fns";
+import { useState, useEffect, useMemo } from "react";
+import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import Greeting from "@/components/Greeting";
