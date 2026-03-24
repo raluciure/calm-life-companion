@@ -26,7 +26,7 @@ const Greeting = () => {
       transition={{ duration: 0.6 }}
       className="text-center space-y-1"
     >
-      <h1 className="text-2xl font-display font-light text-foreground">
+      <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
         {emoji} {text}
       </h1>
       <p className="text-sm font-body text-muted-foreground">
