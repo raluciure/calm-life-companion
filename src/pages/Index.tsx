@@ -28,6 +28,7 @@ const MainApp = () => {
   const { data: tomorrowItems = [] } = useTomorrowItems();
   const addItem = useAddItem();
   const toggleItem = useToggleItem();
+  const deleteItem = useDeleteItem();
 
   const handleToggle = (id: string) => {
     const item = items.find((i) => i.id === id);
