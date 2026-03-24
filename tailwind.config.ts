@@ -73,6 +73,11 @@ export default {
           DEFAULT: "hsl(var(--personal))",
           dot: "hsl(var(--personal-dot))",
         },
+        period: {
+          DEFAULT: "hsl(var(--period))",
+          active: "hsl(var(--period-active))",
+          foreground: "hsl(var(--period-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
