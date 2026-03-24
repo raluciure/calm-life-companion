@@ -184,7 +184,32 @@ const MainApp = () => {
           <MonthlyView selectedDate={selectedDate} onDayTap={handleDayTap} />
         )}
 
-        <p className="text-center text-xs text-muted-foreground/40 font-body pt-4">hush</p>
+        {/* Health Section */}
+        {section === "health" && <HealthSection />}
+
+        <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border/50">
+        <div className="max-w-md mx-auto flex">
+          <button
+            onClick={() => setSection("timeline")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "timeline" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Schedule</span>
+          </button>
+          <button
+            onClick={() => setSection("health")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "health" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <Heart className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Health</span>
+          </button>
+        </div>
       </div>
     </div>
   );
