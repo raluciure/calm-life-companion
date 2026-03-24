@@ -129,10 +129,10 @@ const MainApp = () => {
               ) : (
                 <div className="space-y-2">
                   {timedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} />
+                    <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
                   ))}
                   {untimedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} />
+                    <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
                   ))}
                   {items.length === 0 && (
                     <p className="text-center text-sm text-muted-foreground/60 font-body italic py-8">
