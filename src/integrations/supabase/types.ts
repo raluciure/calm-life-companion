@@ -56,6 +56,95 @@ export type Database = {
         }
         Relationships: []
       }
+      medication_logs: {
+        Row: {
+          date: string
+          id: string
+          medication_id: string
+          taken: boolean
+          taken_at: string | null
+          user_id: string
+        }
+        Insert: {
+          date?: string
+          id?: string
+          medication_id: string
+          taken?: boolean
+          taken_at?: string | null
+          user_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          medication_id?: string
+          taken?: boolean
+          taken_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_logs_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          active: boolean
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      period_logs: {
+        Row: {
+          created_at: string
+          date: string
+          flow: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          flow?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          flow?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
