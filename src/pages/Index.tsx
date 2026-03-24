@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { format, isToday, addWeeks, subWeeks, addMonths, subMonths } from "date-fns";
+import { useState, useEffect, useMemo } from "react";
+import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import Greeting from "@/components/Greeting";
@@ -86,28 +86,48 @@ const MainApp = () => {
         <ViewSwitcher active={viewMode} onChange={setViewMode} />
 
         {/* Navigation for week/month */}
-        {viewMode !== "day" && (
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => handleDateNav("prev")}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => { setSelectedDate(new Date()); }}
-              className="text-xs font-body text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => handleDateNav("next")}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
-            >
-              →
-            </button>
-          </div>
-        )}
+        {viewMode !== "day" && (() => {
+          const isCurrentPeriod = viewMode === "week"
+            ? isThisWeek(selectedDate, { weekStartsOn: 1 })
+            : isThisMonth(selectedDate);
+
+          const periodLabel = viewMode === "week"
+            ? (() => {
+                const ws = startOfWeek(selectedDate, { weekStartsOn: 1 });
+                return `${format(ws, "MMM d")} – ${format(addDays(ws, 6), "MMM d")}`;
+              })()
+            : format(selectedDate, "MMMM yyyy");
+
+          return (
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => handleDateNav("prev")}
+                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
+              >
+                ←
+              </button>
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-xs font-body font-medium text-foreground">
+                  {periodLabel}
+                </span>
+                {!isCurrentPeriod && (
+                  <button
+                    onClick={() => setSelectedDate(new Date())}
+                    className="text-[10px] font-body text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Back to today
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => handleDateNav("next")}
+                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
+              >
+                →
+              </button>
+            </div>
+          );
+        })()}
 
         {/* Day View */}
         {viewMode === "day" && (
