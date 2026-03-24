@@ -51,6 +51,11 @@
     --personal: 280 15% 90%;
     --personal-dot: 280 20% 65%;
 
+    /* Period tracking */
+    --period: 350 50% 85%;
+    --period-active: 350 55% 65%;
+    --period-foreground: 350 50% 30%;
+
     /* Fonts */
     --font-display: 'Source Serif 4', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;

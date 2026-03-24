@@ -12,13 +12,17 @@ import ViewSwitcher, { type ViewMode } from "@/components/ViewSwitcher";
 import WeeklyView from "@/components/WeeklyView";
 import MonthlyView from "@/components/MonthlyView";
 import AuthGate from "@/components/AuthGate";
+import HealthSection from "@/components/HealthSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart } from "lucide-react";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
+type AppSection = "timeline" | "health";
+
 const MainApp = () => {
+  const [section, setSection] = useState<AppSection>("timeline");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("day");
   const dateStr = toDateStr(selectedDate);
@@ -82,105 +86,135 @@ const MainApp = () => {
 
         <Greeting />
 
-        {/* View Switcher */}
-        <ViewSwitcher active={viewMode} onChange={setViewMode} />
-
-        {/* Navigation for week/month */}
-        {viewMode !== "day" && (() => {
-          const isCurrentPeriod = viewMode === "week"
-            ? isThisWeek(selectedDate, { weekStartsOn: 1 })
-            : isThisMonth(selectedDate);
-
-          const periodLabel = viewMode === "week"
-            ? (() => {
-                const ws = startOfWeek(selectedDate, { weekStartsOn: 1 });
-                return `${format(ws, "MMM d")} – ${format(addDays(ws, 6), "MMM d")}`;
-              })()
-            : format(selectedDate, "MMMM yyyy");
-
-          return (
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => handleDateNav("prev")}
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
-              >
-                ←
-              </button>
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-xs font-body font-medium text-foreground">
-                  {periodLabel}
-                </span>
-                {!isCurrentPeriod && (
-                  <button
-                    onClick={() => setSelectedDate(new Date())}
-                    className="text-[10px] font-body text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Back to today
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => handleDateNav("next")}
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
-              >
-                →
-              </button>
-            </div>
-          );
-        })()}
-
-        {/* Day View */}
-        {viewMode === "day" && (
+        {/* Schedule Section */}
+        {section === "timeline" && (
           <>
-            <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
+            {/* View Switcher */}
+            <ViewSwitcher active={viewMode} onChange={setViewMode} />
 
-            <motion.div
-              key={dateStr}
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {isLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-14 rounded-xl bg-secondary/50 animate-gentle-pulse" />
-                  ))}
+            {/* Navigation for week/month */}
+            {viewMode !== "day" && (() => {
+              const isCurrentPeriod = viewMode === "week"
+                ? isThisWeek(selectedDate, { weekStartsOn: 1 })
+                : isThisMonth(selectedDate);
+
+              const periodLabel = viewMode === "week"
+                ? (() => {
+                    const ws = startOfWeek(selectedDate, { weekStartsOn: 1 });
+                    return `${format(ws, "MMM d")} – ${format(addDays(ws, 6), "MMM d")}`;
+                  })()
+                : format(selectedDate, "MMMM yyyy");
+
+              return (
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => handleDateNav("prev")}
+                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
+                  >
+                    ←
+                  </button>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-xs font-body font-medium text-foreground">
+                      {periodLabel}
+                    </span>
+                    {!isCurrentPeriod && (
+                      <button
+                        onClick={() => setSelectedDate(new Date())}
+                        className="text-[10px] font-body text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Back to today
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleDateNav("next")}
+                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-sm font-body"
+                  >
+                    →
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {timedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
-                  ))}
-                  {untimedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
-                  ))}
-                  {items.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground/60 font-body italic py-8">
-                      {viewingToday ? "A fresh start — add something below ✨" : "Nothing planned — keep it open 🌿"}
-                    </p>
+              );
+            })()}
+
+            {/* Day View */}
+            {viewMode === "day" && (
+              <>
+                <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
+
+                <motion.div
+                  key={dateStr}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-14 rounded-xl bg-secondary/50 animate-gentle-pulse" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {timedItems.map((item, i) => (
+                        <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
+                      ))}
+                      {untimedItems.map((item, i) => (
+                        <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
+                      ))}
+                      {items.length === 0 && (
+                        <p className="text-center text-sm text-muted-foreground/60 font-body italic py-8">
+                          {viewingToday ? "A fresh start — add something below ✨" : "Nothing planned — keep it open 🌿"}
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-              {items.length > 0 && <FreeTimeMessage />}
-            </motion.div>
+                  {items.length > 0 && <FreeTimeMessage />}
+                </motion.div>
 
-            <QuickAdd onAdd={handleAdd} dateLabel={viewingToday ? undefined : format(selectedDate, "MMM d")} />
+                <QuickAdd onAdd={handleAdd} dateLabel={viewingToday ? undefined : format(selectedDate, "MMM d")} />
 
-            {viewingToday && <TomorrowPreview items={tomorrowItems} />}
+                {viewingToday && <TomorrowPreview items={tomorrowItems} />}
+              </>
+            )}
+
+            {/* Week View */}
+            {viewMode === "week" && (
+              <WeeklyView selectedDate={selectedDate} onDayTap={handleDayTap} />
+            )}
+
+            {/* Month View */}
+            {viewMode === "month" && (
+              <MonthlyView selectedDate={selectedDate} onDayTap={handleDayTap} />
+            )}
           </>
         )}
 
-        {/* Week View */}
-        {viewMode === "week" && (
-          <WeeklyView selectedDate={selectedDate} onDayTap={handleDayTap} />
-        )}
+        {/* Health Section */}
+        {section === "health" && <HealthSection />}
 
-        {/* Month View */}
-        {viewMode === "month" && (
-          <MonthlyView selectedDate={selectedDate} onDayTap={handleDayTap} />
-        )}
+        <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
+      </div>
 
-        <p className="text-center text-xs text-muted-foreground/40 font-body pt-4">hush</p>
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border/50">
+        <div className="max-w-md mx-auto flex">
+          <button
+            onClick={() => setSection("timeline")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "timeline" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Schedule</span>
+          </button>
+          <button
+            onClick={() => setSection("health")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "health" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <Heart className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Health</span>
+          </button>
+        </div>
       </div>
     </div>
   );
