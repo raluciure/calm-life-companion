@@ -90,12 +90,12 @@ const PeriodTracker = () => {
               className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative
                 ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
                 ${today ? "ring-1 ring-primary/30" : ""}
-                ${isPeriod ? "bg-rose-200/70 text-rose-800 font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
+                ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
               `}
             >
               {format(day, "d")}
               {isPeriod && (
-                <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-rose-400" />
+                <span className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-period-active" />
               )}
             </button>
           );
