@@ -12,9 +12,10 @@ import ViewSwitcher, { type ViewMode } from "@/components/ViewSwitcher";
 import WeeklyView from "@/components/WeeklyView";
 import MonthlyView from "@/components/MonthlyView";
 import AuthGate from "@/components/AuthGate";
+import HealthSection from "@/components/HealthSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart } from "lucide-react";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
