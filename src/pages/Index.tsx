@@ -19,7 +19,10 @@ import { LogOut, CalendarDays as CalendarIcon, Heart } from "lucide-react";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
+type AppSection = "timeline" | "health";
+
 const MainApp = () => {
+  const [section, setSection] = useState<AppSection>("timeline");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("day");
   const dateStr = toDateStr(selectedDate);
