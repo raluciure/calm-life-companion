@@ -113,3 +113,18 @@ export function useToggleItem() {
     },
   });
 }
+
+export function useDeleteItem() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("items").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: ["items-range"] });
+    },
+  });
+}

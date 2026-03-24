@@ -12,7 +12,7 @@ import ViewSwitcher, { type ViewMode } from "@/components/ViewSwitcher";
 import WeeklyView from "@/components/WeeklyView";
 import MonthlyView from "@/components/MonthlyView";
 import AuthGate from "@/components/AuthGate";
-import { useItems, useTomorrowItems, useAddItem, useToggleItem } from "@/hooks/useItems";
+import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 
@@ -28,6 +28,7 @@ const MainApp = () => {
   const { data: tomorrowItems = [] } = useTomorrowItems();
   const addItem = useAddItem();
   const toggleItem = useToggleItem();
+  const deleteItem = useDeleteItem();
 
   const handleToggle = (id: string) => {
     const item = items.find((i) => i.id === id);
@@ -128,10 +129,10 @@ const MainApp = () => {
               ) : (
                 <div className="space-y-2">
                   {timedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} />
+                    <TimelineItem key={item.id} item={item} index={i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
                   ))}
                   {untimedItems.map((item, i) => (
-                    <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} />
+                    <TimelineItem key={item.id} item={item} index={timedItems.length + i} onToggle={handleToggle} onDelete={(id) => deleteItem.mutate(id)} />
                   ))}
                   {items.length === 0 && (
                     <p className="text-center text-sm text-muted-foreground/60 font-body italic py-8">
