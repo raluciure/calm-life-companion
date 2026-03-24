@@ -12,7 +12,7 @@ import ViewSwitcher, { type ViewMode } from "@/components/ViewSwitcher";
 import WeeklyView from "@/components/WeeklyView";
 import MonthlyView from "@/components/MonthlyView";
 import AuthGate from "@/components/AuthGate";
-import { useItems, useTomorrowItems, useAddItem, useToggleItem } from "@/hooks/useItems";
+import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 
