@@ -33,7 +33,7 @@ export function useItems(date?: string) {
         .from("items")
         .select("*")
         .eq("date", targetDate)
-        .order("time", { ascending: true, nullsFirst: false });
+        .order("time", { ascending: true, nullsFirst: true });
       if (error) throw error;
       return (data || []).map(toTimelineItem);
     },

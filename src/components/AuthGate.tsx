@@ -8,11 +8,13 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccessMessage("");
 
     const { error: authError } = isSignUp
       ? await supabase.auth.signUp({ email, password })
@@ -20,6 +22,8 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
 
     if (authError) {
       setError(authError.message);
+    } else if (isSignUp) {
+      setSuccessMessage("Check your email for a confirmation link to activate your account ✉️");
     }
     setLoading(false);
   };
@@ -60,6 +64,9 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
 
           {error && (
             <p className="text-sm text-destructive font-body text-center">{error}</p>
+          )}
+          {successMessage && (
+            <p className="text-sm text-primary font-body text-center">{successMessage}</p>
           )}
 
           <button
