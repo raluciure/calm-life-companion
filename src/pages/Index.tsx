@@ -13,13 +13,14 @@ import WeeklyView from "@/components/WeeklyView";
 import MonthlyView from "@/components/MonthlyView";
 import AuthGate from "@/components/AuthGate";
 import HealthSection from "@/components/HealthSection";
+import GymSection from "@/components/GymSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut, CalendarDays as CalendarIcon, Heart } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell } from "lucide-react";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
-type AppSection = "timeline" | "health";
+type AppSection = "timeline" | "health" | "gym";
 
 const MainApp = () => {
   const [section, setSection] = useState<AppSection>("timeline");
