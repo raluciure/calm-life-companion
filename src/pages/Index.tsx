@@ -204,6 +204,9 @@ const MainApp = () => {
         {/* Health Section */}
         {section === "health" && <HealthSection />}
 
+        {/* Gym Section */}
+        {section === "gym" && <GymSection />}
+
         <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
       </div>
 
@@ -225,6 +228,14 @@ const MainApp = () => {
           >
             <Heart className="w-5 h-5" />
             <span className="text-[10px] font-body font-medium">Health</span>
+          </button>
+          <button
+            onClick={() => setSection("gym")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "gym" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <Dumbbell className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Gym</span>
           </button>
         </div>
       </div>
