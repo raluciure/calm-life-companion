@@ -67,7 +67,18 @@ const MainApp = () => {
 
   const handleSignOut = () => supabase.auth.signOut();
 
-  const timedItems = items.filter((i) => i.time).sort((a, b) => (a.time! > b.time! ? 1 : -1));
+  const parseTime = (t: string) => {
+    const match = t.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+    if (!match) return 0;
+    let h = parseInt(match[1]);
+    const m = parseInt(match[2] || "0");
+    const pm = match[3].toUpperCase() === "PM";
+    if (pm && h !== 12) h += 12;
+    if (!pm && h === 12) h = 0;
+    return h * 60 + m;
+  };
+
+  const timedItems = items.filter((i) => i.time).sort((a, b) => parseTime(a.time!) - parseTime(b.time!));
   const untimedItems = items.filter((i) => !i.time);
 
   return (
