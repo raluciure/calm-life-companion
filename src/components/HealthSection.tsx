@@ -10,11 +10,11 @@ const HealthSection = () => {
       transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      <div className="text-center">
-        <h2 className="text-lg sm:text-xl font-display font-light text-foreground">
+      <div className="text-center space-y-1">
+        <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
           🫶 Health & Wellness
-        </h2>
-        <p className="text-xs font-body text-muted-foreground mt-1">
+        </h1>
+        <p className="text-sm font-body text-muted-foreground">
           Take care of yourself
         </p>
       </div>
