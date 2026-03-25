@@ -145,6 +145,42 @@ export type Database = {
         }
         Relationships: []
       }
+      workouts: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number | null
+          emoji: string
+          exercises: Json | null
+          id: string
+          notes: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number | null
+          emoji?: string
+          exercises?: Json | null
+          id?: string
+          notes?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number | null
+          emoji?: string
+          exercises?: Json | null
+          id?: string
+          notes?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
