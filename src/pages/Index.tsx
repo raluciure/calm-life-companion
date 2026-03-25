@@ -95,7 +95,7 @@ const MainApp = () => {
           </button>
         </div>
 
-        <Greeting />
+        {section === "timeline" && <Greeting />}
 
         {/* Schedule Section */}
         {section === "timeline" && (
