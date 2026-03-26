@@ -195,6 +195,12 @@ export function useToggleMedLog() {
           date,
         });
         if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["medication-logs"] });
+    },
+  });
 }
 
 // ── Period Symptoms ──
