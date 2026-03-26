@@ -70,6 +70,29 @@ export function useAddWorkout() {
   });
 }
 
+export function useUpdateWorkout() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (workout: {
+      id: string;
+      title: string;
+      emoji: string;
+      date: string;
+      duration_minutes?: number;
+      notes?: string;
+      exercises?: Exercise[];
+    }) => {
+      const { id, ...rest } = workout;
+      const { error } = await supabase
+        .from("workouts")
+        .update({ ...rest, exercises: rest.exercises || [] } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["workouts"] }),
+  });
+}
+
 export function useDeleteWorkout() {
   const qc = useQueryClient();
   return useMutation({
