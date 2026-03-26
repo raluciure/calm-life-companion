@@ -202,3 +202,65 @@ export function useToggleMedLog() {
     },
   });
 }
+
+// ── Period Symptoms ──
+
+export interface PeriodSymptom {
+  id: string;
+  date: string;
+  symptom: string;
+  severity: number;
+}
+
+export function usePeriodSymptoms(month: string) {
+  return useQuery({
+    queryKey: ["period-symptoms", month],
+    queryFn: async () => {
+      const startDate = `${month}-01`;
+      const endDate = `${month}-31`;
+      const { data, error } = await supabase
+        .from("period_symptoms")
+        .select("*")
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: true });
+      if (error) throw error;
+      return (data || []) as PeriodSymptom[];
+    },
+  });
+}
+
+export function useToggleSymptom() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ date, symptom, severity }: { date: string; symptom: string; severity?: number }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not logged in");
+
+      const { data: existing } = await supabase
+        .from("period_symptoms")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("date", date)
+        .eq("symptom", symptom)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase.from("period_symptoms").delete().eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("period_symptoms").insert({
+          user_id: user.id,
+          date,
+          symptom,
+          severity: severity || 1,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["period-symptoms"] });
+    },
+  });
+}

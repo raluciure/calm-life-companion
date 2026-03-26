@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
+import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Check, ChevronLeft, ChevronRight, Calendar, List } from "lucide-react";
 import {
@@ -9,6 +9,8 @@ import {
   useTodayMedLogs,
   useToggleMedLog,
   useMedLogsByMonth,
+  type Medication,
+  type MedicationLog,
 } from "@/hooks/useHealth";
 
 const todayStr = () => new Date().toISOString().split("T")[0];
@@ -29,6 +31,7 @@ const MedicationTracker = () => {
   const [newEmoji, setNewEmoji] = useState("💊");
   const [view, setView] = useState<MedView>("today");
   const [viewDate, setViewDate] = useState(new Date());
+  const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
 
   const monthStr = format(viewDate, "yyyy-MM");
   const { data: monthLogs = [] } = useMedLogsByMonth(monthStr);
@@ -63,11 +66,24 @@ const MedicationTracker = () => {
 
   const weekdays = ["M", "T", "W", "T", "F", "S", "S"];
 
-  // Build a map: date -> count of meds taken
+  // Build maps
   const dateTakenMap = new Map<string, number>();
+  const dateLogsMap = new Map<string, MedicationLog[]>();
   monthLogs.forEach((log) => {
     dateTakenMap.set(log.date, (dateTakenMap.get(log.date) || 0) + 1);
+    if (!dateLogsMap.has(log.date)) dateLogsMap.set(log.date, []);
+    dateLogsMap.get(log.date)!.push(log);
   });
+
+  // Build med lookup
+  const medById = new Map<string, Medication>();
+  meds.forEach((m) => medById.set(m.id, m));
+
+  // Meds taken on selected calendar date
+  const selectedDateLogs = selectedCalDate ? dateLogsMap.get(selectedCalDate) || [] : [];
+  const selectedDateMeds = selectedDateLogs
+    .map((log) => medById.get(log.medication_id))
+    .filter(Boolean) as Medication[];
 
   return (
     <motion.div
@@ -89,7 +105,7 @@ const MedicationTracker = () => {
           </h3>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setView(view === "today" ? "calendar" : "today")}
+              onClick={() => { setView(view === "today" ? "calendar" : "today"); setSelectedCalDate(null); }}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               title={view === "today" ? "Calendar view" : "List view"}
             >
@@ -200,7 +216,7 @@ const MedicationTracker = () => {
               </h3>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setViewDate(subMonths(viewDate, 1))}
+                  onClick={() => { setViewDate(subMonths(viewDate, 1)); setSelectedCalDate(null); }}
                   className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -209,7 +225,7 @@ const MedicationTracker = () => {
                   {format(viewDate, "MMM yyyy")}
                 </span>
                 <button
-                  onClick={() => setViewDate(addMonths(viewDate, 1))}
+                  onClick={() => { setViewDate(addMonths(viewDate, 1)); setSelectedCalDate(null); }}
                   className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -236,13 +252,17 @@ const MedicationTracker = () => {
                 const totalMeds = meds.length;
                 const allDone = totalMeds > 0 && takenCount >= totalMeds;
                 const partial = takenCount > 0 && !allDone;
+                const isSelected = selectedCalDate === dateStr;
 
                 return (
-                  <div
+                  <button
                     key={dateStr}
-                    className={`aspect-square flex flex-col items-center justify-center rounded-full text-[11px] font-body relative
-                      ${!inMonth ? "opacity-20" : ""}
+                    disabled={!inMonth}
+                    onClick={() => inMonth && setSelectedCalDate(isSelected ? null : dateStr)}
+                    className={`aspect-square flex flex-col items-center justify-center rounded-full text-[11px] font-body relative transition-all
+                      ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
                       ${today ? "ring-1 ring-primary/30" : ""}
+                      ${isSelected ? "ring-2 ring-primary" : ""}
                       ${allDone ? "bg-primary/15 text-primary font-medium" : partial ? "bg-accent/40 text-foreground/70" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
                     `}
                   >
@@ -250,22 +270,62 @@ const MedicationTracker = () => {
                     {takenCount > 0 && inMonth && (
                       <span className={`absolute -bottom-0.5 w-1 h-1 rounded-full ${allDone ? "bg-primary" : "bg-accent-foreground/40"}`} />
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
 
+            {/* Selected date detail */}
+            <AnimatePresence>
+              {selectedCalDate && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-3 pt-3 border-t border-border/50">
+                    <p className="text-xs font-display font-medium text-foreground mb-2">
+                      {format(new Date(selectedCalDate + "T00:00:00"), "EEEE, MMM d")}
+                    </p>
+                    {selectedDateMeds.length > 0 ? (
+                      <div className="space-y-1">
+                        {selectedDateMeds.map((med) => (
+                          <div key={med.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/8">
+                            <Check className="w-3 h-3 text-primary shrink-0" />
+                            <span className="text-xs font-body text-foreground">
+                              {med.emoji} {med.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] font-body text-muted-foreground/60 italic">
+                        No medications logged this day
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Legend */}
-            <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-primary/15 border border-primary/30" />
-                <span className="text-[10px] font-body text-muted-foreground">All taken</span>
+            {!selectedCalDate && (
+              <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary/15 border border-primary/30" />
+                  <span className="text-[10px] font-body text-muted-foreground">All taken</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent/40 border border-accent-foreground/20" />
+                  <span className="text-[10px] font-body text-muted-foreground">Partial</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-accent/40 border border-accent-foreground/20" />
-                <span className="text-[10px] font-body text-muted-foreground">Partial</span>
-              </div>
-            </div>
+            )}
+
+            <p className="text-[10px] font-body text-muted-foreground/40 mt-2 italic">
+              Tap a day to see details
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
