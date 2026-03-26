@@ -150,6 +150,25 @@ export function useTodayMedLogs() {
   });
 }
 
+export function useMedLogsByMonth(month: string) {
+  // month = "2026-03"
+  return useQuery({
+    queryKey: ["medication-logs", "month", month],
+    queryFn: async () => {
+      const startDate = `${month}-01`;
+      const endDate = `${month}-31`;
+      const { data, error } = await supabase
+        .from("medication_logs")
+        .select("*")
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .order("date", { ascending: true });
+      if (error) throw error;
+      return (data || []) as MedicationLog[];
+    },
+  });
+}
+
 export function useToggleMedLog() {
   const qc = useQueryClient();
 
