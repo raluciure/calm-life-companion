@@ -264,9 +264,3 @@ export function useToggleSymptom() {
     },
   });
 }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["medication-logs"] });
-    },
-  });
-}
