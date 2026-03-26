@@ -145,6 +145,33 @@ export type Database = {
         }
         Relationships: []
       }
+      period_symptoms: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          severity: number
+          symptom: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          severity?: number
+          symptom: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          severity?: number
+          symptom?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workouts: {
         Row: {
           created_at: string
