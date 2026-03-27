@@ -16,11 +16,12 @@ import HealthSection from "@/components/HealthSection";
 import GymSection from "@/components/GymSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell, UtensilsCrossed } from "lucide-react";
+import MealSection from "@/components/MealSection";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
-type AppSection = "timeline" | "health" | "gym";
+type AppSection = "timeline" | "health" | "gym" | "meals";
 
 const MainApp = () => {
   const [section, setSection] = useState<AppSection>("timeline");
@@ -207,6 +208,9 @@ const MainApp = () => {
         {/* Gym Section */}
         {section === "gym" && <GymSection />}
 
+        {/* Meals Section */}
+        {section === "meals" && <MealSection />}
+
         <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
       </div>
 
@@ -236,6 +240,14 @@ const MainApp = () => {
           >
             <Dumbbell className="w-5 h-5" />
             <span className="text-[10px] font-body font-medium">Gym</span>
+          </button>
+          <button
+            onClick={() => setSection("meals")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "meals" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <UtensilsCrossed className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Meals</span>
           </button>
         </div>
       </div>
