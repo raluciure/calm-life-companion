@@ -23,6 +23,7 @@ const MealSection = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [estimating, setEstimating] = useState(false);
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const { data: dayMeals = [] } = useMealsByDate(dateStr);
