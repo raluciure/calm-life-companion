@@ -56,6 +56,51 @@ export type Database = {
         }
         Relationships: []
       }
+      meals: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          created_at: string
+          date: string
+          emoji: string
+          fat: number | null
+          id: string
+          meal_type: string
+          notes: string | null
+          protein: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          date?: string
+          emoji?: string
+          fat?: number | null
+          id?: string
+          meal_type?: string
+          notes?: string | null
+          protein?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string
+          date?: string
+          emoji?: string
+          fat?: number | null
+          id?: string
+          meal_type?: string
+          notes?: string | null
+          protein?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       medication_logs: {
         Row: {
           date: string
