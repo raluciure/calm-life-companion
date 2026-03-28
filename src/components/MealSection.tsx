@@ -37,6 +37,7 @@ const MealSection = () => {
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const { data: dayMeals = [] } = useMealsByDate(dateStr);
   const { data: weekMeals = [] } = useMealsByWeek(selectedDate);
+  const addMeal = useAddMeal();
   const { data: groceryItems = [] } = useGroceryItems();
   const addGroceryItem = useAddGroceryItem();
   const toggleGroceryItem = useToggleGroceryItem();
