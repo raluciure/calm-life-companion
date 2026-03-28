@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      grocery_items: {
+        Row: {
+          category: string
+          checked: boolean
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          checked?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          checked?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       items: {
         Row: {
           category: Database["public"]["Enums"]["item_category"]
