@@ -486,6 +486,127 @@ const MealSection = () => {
           </div>
         </>
       )}
+
+      {/* ─── GROCERY VIEW ─── */}
+      {view === "grocery" && (
+        <>
+          <div className="space-y-3">
+            {/* Add item form */}
+            <div className="flex gap-2">
+              <input
+                value={groceryName}
+                onChange={(e) => setGroceryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && groceryName.trim()) {
+                    addGroceryItem.mutate({ name: groceryName.trim(), category: groceryCategory });
+                    setGroceryName("");
+                  }
+                }}
+                placeholder="Add item..."
+                className="flex-1 bg-secondary/30 rounded-xl px-3 py-2.5 text-sm font-body text-foreground placeholder:text-muted-foreground/50 outline-none border border-border/30 focus:border-primary/30"
+              />
+              <button
+                onClick={() => {
+                  if (groceryName.trim()) {
+                    addGroceryItem.mutate({ name: groceryName.trim(), category: groceryCategory });
+                    setGroceryName("");
+                  }
+                }}
+                disabled={!groceryName.trim()}
+                className="px-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-body font-medium disabled:opacity-40 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Category selector */}
+            <div className="flex gap-1.5 flex-wrap">
+              {GROCERY_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setGroceryCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-body capitalize transition-all ${
+                    groceryCategory === cat
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "bg-secondary/50 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {CATEGORY_EMOJIS[cat]} {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Items grouped by category */}
+            {groceryItems.length === 0 ? (
+              <div className="text-center py-8">
+                <ShoppingCart className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+                <p className="text-sm font-body text-muted-foreground/50">Your grocery list is empty</p>
+              </div>
+            ) : (
+              <>
+                {Object.entries(
+                  groceryItems.reduce<Record<string, typeof groceryItems>>((acc, item) => {
+                    const cat = item.category || "other";
+                    if (!acc[cat]) acc[cat] = [];
+                    acc[cat].push(item);
+                    return acc;
+                  }, {})
+                ).map(([category, items]) => (
+                  <div key={category}>
+                    <p className="text-xs font-body font-medium text-muted-foreground mb-1.5 capitalize flex items-center gap-1">
+                      {CATEGORY_EMOJIS[category] || "📦"} {category}
+                    </p>
+                    <div className="space-y-1">
+                      {items.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          layout
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className={`flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2.5 transition-colors ${
+                            item.checked ? "opacity-50" : ""
+                          }`}
+                        >
+                          <button
+                            onClick={() => toggleGroceryItem.mutate({ id: item.id, checked: !item.checked })}
+                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                              item.checked
+                                ? "bg-primary border-primary"
+                                : "border-border/50 hover:border-primary/50"
+                            }`}
+                          >
+                            {item.checked && <Check className="w-3 h-3 text-primary-foreground" />}
+                          </button>
+                          <span className={`flex-1 text-sm font-body ${item.checked ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                            {item.name}
+                          </span>
+                          <button
+                            onClick={() => deleteGroceryItem.mutate(item.id)}
+                            className="text-muted-foreground/40 hover:text-destructive transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Clear checked */}
+                {groceryItems.some((i) => i.checked) && (
+                  <button
+                    onClick={() => clearChecked.mutate()}
+                    className="w-full py-2 rounded-xl text-[11px] font-body text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all"
+                  >
+                    Clear checked items
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </>
+      )}
     </motion.div>
   );
 };
