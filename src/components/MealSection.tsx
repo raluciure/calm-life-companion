@@ -215,22 +215,17 @@ const MealSection = () => {
       {/* View toggle */}
       <div className="flex justify-center">
         <div className="inline-flex rounded-xl bg-secondary/50 p-1 gap-1">
-          <button
-            onClick={() => setView("daily")}
-            className={`px-4 py-2 rounded-lg text-xs font-body font-medium transition-all ${
-              view === "daily" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            📅 Daily
-          </button>
-          <button
-            onClick={() => setView("weekly")}
-            className={`px-4 py-2 rounded-lg text-xs font-body font-medium transition-all ${
-              view === "weekly" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            📊 Weekly
-          </button>
+          {([["daily", "📅 Daily"], ["weekly", "📊 Weekly"], ["grocery", "🛒 Grocery"]] as const).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-2 rounded-lg text-xs font-body font-medium transition-all ${
+                view === v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
