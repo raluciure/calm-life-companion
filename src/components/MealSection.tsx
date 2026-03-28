@@ -187,6 +187,20 @@ const MealSection = () => {
                   ) : (
                     <div className="space-y-1.5">
                       {meals.map((meal) => (
+                        editingMeal?.id === meal.id && showForm ? (
+                          <motion.div
+                            key={meal.id + "-edit"}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="bg-secondary/30 rounded-xl p-3 space-y-3"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-body font-medium text-foreground">Edit Meal</span>
+                              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+                            </div>
+                            {renderForm()}
+                          </motion.div>
+                        ) : (
                         <div
                           key={meal.id}
                           onClick={() => setExpandedId(expandedId === meal.id ? null : meal.id)}
@@ -235,6 +249,7 @@ const MealSection = () => {
                             )}
                           </AnimatePresence>
                         </div>
+                        )
                       ))}
                     </div>
                   )}
