@@ -43,16 +43,19 @@ serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Extract JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    // Extract JSON from response - handle markdown code blocks and cleanup
+    let cleaned = content.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+    const jsonStart = cleaned.search(/\{/);
+    const jsonEnd = cleaned.lastIndexOf("}");
+    if (jsonStart === -1 || jsonEnd === -1) {
       return new Response(JSON.stringify({ error: "Could not parse response" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const nutrition = JSON.parse(jsonMatch[0]);
+    cleaned = cleaned.substring(jsonStart, jsonEnd + 1)
+      .replace(/,\s*}/g, "}").replace(/[\x00-\x1F\x7F]/g, "");
+    const nutrition = JSON.parse(cleaned);
     return new Response(JSON.stringify(nutrition), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
