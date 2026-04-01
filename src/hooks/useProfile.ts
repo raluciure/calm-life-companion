@@ -176,6 +176,42 @@ export function useRemoveFriend() {
   });
 }
 
+// Sent (outgoing) friend requests
+export function useSentRequests() {
+  return useQuery({
+    queryKey: ["sent_requests"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("*")
+        .eq("requester_id", user.id)
+        .eq("status", "pending");
+      if (error) throw error;
+      return (data || []) as Friendship[];
+    },
+  });
+}
+
+export function useCancelFriendRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (friendshipId: string) => {
+      const { error } = await supabase
+        .from("friendships")
+        .delete()
+        .eq("id", friendshipId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sent_requests"] });
+      qc.invalidateQueries({ queryKey: ["friends"] });
+      qc.invalidateQueries({ queryKey: ["search_profiles"] });
+    },
+  });
+}
+
 // Profiles by IDs (for resolving friend names)
 export function useProfilesByIds(userIds: string[]) {
   return useQuery({

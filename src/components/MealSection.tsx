@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, isToday, isThisWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
-import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useFriends, useProfilesByIds, useShareItem, type Profile } from "@/hooks/useProfile";
 import {
   useMealsByDate,
   useMealsByWeek,
@@ -45,8 +47,21 @@ const MealSection = () => {
   const clearChecked = useClearCheckedGroceryItems();
   const [groceryName, setGroceryName] = useState("");
   const [groceryCategory, setGroceryCategory] = useState("other");
+  const [showShareGrocery, setShowShareGrocery] = useState(false);
   const updateMeal = useUpdateMeal();
   const deleteMeal = useDeleteMeal();
+
+  // Friends for sharing
+  const { data: friends = [] } = useFriends();
+  const shareItem = useShareItem();
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
+  }, []);
+  const friendUserIds = friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id).filter(Boolean);
+  const { data: friendProfiles = [] } = useProfilesByIds(friendUserIds);
+  const friendProfileMap: Record<string, Profile> = {};
+  friendProfiles.forEach((p) => (friendProfileMap[p.user_id] = p));
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
@@ -603,6 +618,51 @@ const MealSection = () => {
                   </button>
                 )}
               </>
+            )}
+
+            {/* Share grocery list */}
+            {groceryItems.length > 0 && friendUserIds.length > 0 && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowShareGrocery(!showShareGrocery)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/5 text-primary text-xs font-body font-medium hover:bg-primary/10 transition-all border border-primary/10"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Share grocery list with a friend
+                </button>
+                <AnimatePresence>
+                  {showShareGrocery && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-1.5 overflow-hidden"
+                    >
+                      {friendUserIds.map((fid) => {
+                        const p = friendProfileMap[fid];
+                        return (
+                          <button
+                            key={fid}
+                            onClick={() => {
+                              const itemNames = groceryItems.filter(i => !i.checked).map(i => i.name).join(", ");
+                              shareItem.mutate(
+                                { to_user_id: fid, item_type: "grocery_list", item_id: "grocery", message: itemNames },
+                                { onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); } }
+                              );
+                            }}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-body">
+                              {p?.display_name?.[0]?.toUpperCase() || "?"}
+                            </div>
+                            <span className="text-sm font-body text-foreground">{p?.display_name || "Friend"}</span>
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
         </>
