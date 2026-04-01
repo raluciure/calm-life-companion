@@ -166,6 +166,7 @@ const MyProfileTab = () => {
 // ---- Friends Tab ----
 const FriendsTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [myUserId, setMyUserId] = useState<string | null>(null);
   const { data: searchResults = [] } = useSearchProfiles(searchQuery);
   const { data: friends = [] } = useFriends();
   const { data: pendingRequests = [] } = usePendingRequests();
@@ -173,13 +174,16 @@ const FriendsTab = () => {
   const respondToRequest = useRespondToRequest();
   const removeFriend = useRemoveFriend();
 
+  // Get current user ID
+  useState(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
+  });
+
   // Get friend user IDs to resolve names
   const friendUserIds = useMemo(() => {
-    return friends.map((f) => {
-      // Get the other user's ID
-      return f.requester_id === currentUserId(friends) ? f.addressee_id : f.requester_id;
-    });
-  }, [friends]);
+    if (!myUserId) return [];
+    return friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id);
+  }, [friends, myUserId]);
 
   const pendingUserIds = useMemo(() => pendingRequests.map((r) => r.requester_id), [pendingRequests]);
 
