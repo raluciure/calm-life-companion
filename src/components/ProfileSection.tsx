@@ -311,7 +311,7 @@ const FriendsTab = () => {
           </p>
         ) : (
           friends.map((f) => {
-            const friendId = getFriendUserId(f);
+            const friendId = myUserId && f.requester_id === myUserId ? f.addressee_id : f.requester_id;
             const p = profileMap[friendId];
             return (
               <div key={f.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
