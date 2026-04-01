@@ -306,6 +306,37 @@ const FriendsTab = () => {
         </div>
       )}
 
+      {/* Sent Requests */}
+      {sentRequests.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs font-body text-muted-foreground px-1">
+            Sent requests ({sentRequests.length})
+          </p>
+          {sentRequests.map((req) => {
+            const p = profileMap[req.addressee_id];
+            return (
+              <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-border/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-body">
+                    {p?.display_name?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div>
+                    <span className="text-sm font-body text-foreground">{p?.display_name || "User"}</span>
+                    <span className="text-[10px] font-body text-muted-foreground ml-2">Pending</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => cancelRequest.mutate(req.id, { onSuccess: () => toast.success("Request cancelled") })}
+                  className="p-2 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Friends List */}
       <div className="space-y-1.5">
         <p className="text-xs font-body text-muted-foreground px-1">
