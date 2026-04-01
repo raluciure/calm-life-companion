@@ -16,8 +16,9 @@ import HealthSection from "@/components/HealthSection";
 import GymSection from "@/components/GymSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell, UtensilsCrossed } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import MealSection from "@/components/MealSection";
+import ProfileSection from "@/components/ProfileSection";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
