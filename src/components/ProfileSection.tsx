@@ -15,6 +15,8 @@ import {
   useSharedWithMe,
   useShareItem,
   useUserStats,
+  useSentRequests,
+  useCancelFriendRequest,
   type Profile,
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
