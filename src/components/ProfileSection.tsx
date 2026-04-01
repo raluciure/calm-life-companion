@@ -175,9 +175,9 @@ const FriendsTab = () => {
   const removeFriend = useRemoveFriend();
 
   // Get current user ID
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
-  });
+  }, []);
 
   // Get friend user IDs to resolve names
   const friendUserIds = useMemo(() => {
