@@ -336,25 +336,6 @@ const FriendsTab = () => {
   );
 };
 
-// Helper to get friend's user ID from a friendship record
-function getFriendUserId(friendship: { requester_id: string; addressee_id: string }) {
-  // We need the current user ID — stored temporarily
-  return _currentUserId && friendship.requester_id === _currentUserId
-    ? friendship.addressee_id
-    : friendship.requester_id;
-}
-
-let _currentUserId: string | null = null;
-
-function currentUserId(friends: any[]) {
-  // Lazy resolution
-  if (!_currentUserId) {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      _currentUserId = user?.id || null;
-    });
-  }
-  return _currentUserId || "";
-}
 
 // ---- Shared Tab ----
 const SharedTab = () => {
