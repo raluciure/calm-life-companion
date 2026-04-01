@@ -172,9 +172,11 @@ const FriendsTab = () => {
   const { data: searchResults = [] } = useSearchProfiles(searchQuery);
   const { data: friends = [] } = useFriends();
   const { data: pendingRequests = [] } = usePendingRequests();
+  const { data: sentRequests = [] } = useSentRequests();
   const sendRequest = useSendFriendRequest();
   const respondToRequest = useRespondToRequest();
   const removeFriend = useRemoveFriend();
+  const cancelRequest = useCancelFriendRequest();
 
   // Get current user ID
   useEffect(() => {
@@ -188,8 +190,9 @@ const FriendsTab = () => {
   }, [friends, myUserId]);
 
   const pendingUserIds = useMemo(() => pendingRequests.map((r) => r.requester_id), [pendingRequests]);
+  const sentUserIds = useMemo(() => sentRequests.map((r) => r.addressee_id), [sentRequests]);
 
-  const allIds = useMemo(() => [...new Set([...friendUserIds, ...pendingUserIds])], [friendUserIds, pendingUserIds]);
+  const allIds = useMemo(() => [...new Set([...friendUserIds, ...pendingUserIds, ...sentUserIds])], [friendUserIds, pendingUserIds, sentUserIds]);
   const { data: profiles = [] } = useProfilesByIds(allIds);
   const profileMap = useMemo(() => {
     const m: Record<string, Profile> = {};
@@ -205,8 +208,9 @@ const FriendsTab = () => {
       ids.add(f.addressee_id);
     });
     pendingRequests.forEach((r) => ids.add(r.requester_id));
+    sentRequests.forEach((r) => ids.add(r.addressee_id));
     return ids;
-  }, [friends, pendingRequests]);
+  }, [friends, pendingRequests, sentRequests]);
 
   const handleSend = (userId: string) => {
     sendRequest.mutate(userId, {
