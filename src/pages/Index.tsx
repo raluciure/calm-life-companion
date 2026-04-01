@@ -253,6 +253,14 @@ const MainApp = () => {
             <UtensilsCrossed className="w-5 h-5" />
             <span className="text-[10px] font-body font-medium">Meals</span>
           </button>
+          <button
+            onClick={() => setSection("profile")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "profile" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Profile</span>
+          </button>
         </div>
       </div>
     </div>
