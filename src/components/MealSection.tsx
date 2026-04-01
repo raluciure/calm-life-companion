@@ -46,8 +46,21 @@ const MealSection = () => {
   const clearChecked = useClearCheckedGroceryItems();
   const [groceryName, setGroceryName] = useState("");
   const [groceryCategory, setGroceryCategory] = useState("other");
+  const [showShareGrocery, setShowShareGrocery] = useState(false);
   const updateMeal = useUpdateMeal();
   const deleteMeal = useDeleteMeal();
+
+  // Friends for sharing
+  const { data: friends = [] } = useFriends();
+  const shareItem = useShareItem();
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  useState(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
+  });
+  const friendUserIds = friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id).filter(Boolean);
+  const { data: friendProfiles = [] } = useProfilesByIds(friendUserIds);
+  const friendProfileMap: Record<string, Profile> = {};
+  friendProfiles.forEach((p) => (friendProfileMap[p.user_id] = p));
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
