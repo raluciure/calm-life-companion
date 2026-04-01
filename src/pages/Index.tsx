@@ -212,6 +212,9 @@ const MainApp = () => {
         {/* Meals Section */}
         {section === "meals" && <MealSection />}
 
+        {/* Profile Section */}
+        {section === "profile" && <ProfileSection />}
+
         <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
       </div>
 
