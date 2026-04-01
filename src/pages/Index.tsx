@@ -16,12 +16,13 @@ import HealthSection from "@/components/HealthSection";
 import GymSection from "@/components/GymSection";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { motion } from "framer-motion";
-import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell, UtensilsCrossed } from "lucide-react";
+import { LogOut, CalendarDays as CalendarIcon, Heart, Dumbbell, UtensilsCrossed, User } from "lucide-react";
 import MealSection from "@/components/MealSection";
+import ProfileSection from "@/components/ProfileSection";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
-type AppSection = "timeline" | "health" | "gym" | "meals";
+type AppSection = "timeline" | "health" | "gym" | "meals" | "profile";
 
 const MainApp = () => {
   const [section, setSection] = useState<AppSection>("timeline");
@@ -211,6 +212,9 @@ const MainApp = () => {
         {/* Meals Section */}
         {section === "meals" && <MealSection />}
 
+        {/* Profile Section */}
+        {section === "profile" && <ProfileSection />}
+
         <p className="text-center text-xs text-muted-foreground/40 font-body pt-4 pb-20">hush</p>
       </div>
 
@@ -248,6 +252,14 @@ const MainApp = () => {
           >
             <UtensilsCrossed className="w-5 h-5" />
             <span className="text-[10px] font-body font-medium">Meals</span>
+          </button>
+          <button
+            onClick={() => setSection("profile")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+              ${section === "profile" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+          >
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-body font-medium">Profile</span>
           </button>
         </div>
       </div>
