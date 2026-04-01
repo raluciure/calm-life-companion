@@ -393,6 +393,7 @@ const SharedTab = () => {
     workout: { emoji: "💪", label: "Workout" },
     meal: { emoji: "🍽️", label: "Meal" },
     item: { emoji: "📋", label: "Task" },
+    grocery_list: { emoji: "🛒", label: "Grocery list" },
   };
 
   return (
