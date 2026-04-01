@@ -55,9 +55,9 @@ const MealSection = () => {
   const { data: friends = [] } = useFriends();
   const shareItem = useShareItem();
   const [myUserId, setMyUserId] = useState<string | null>(null);
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
-  });
+  }, []);
   const friendUserIds = friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id).filter(Boolean);
   const { data: friendProfiles = [] } = useProfilesByIds(friendUserIds);
   const friendProfileMap: Record<string, Profile> = {};
