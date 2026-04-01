@@ -22,7 +22,7 @@ import ProfileSection from "@/components/ProfileSection";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
-type AppSection = "timeline" | "health" | "gym" | "meals";
+type AppSection = "timeline" | "health" | "gym" | "meals" | "profile";
 
 const MainApp = () => {
   const [section, setSection] = useState<AppSection>("timeline");
