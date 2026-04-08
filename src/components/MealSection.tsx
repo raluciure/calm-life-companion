@@ -633,6 +633,29 @@ const MealSection = () => {
               </>
             )}
 
+            {/* Shared grocery indicators */}
+            {groceryShares.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-body font-medium text-muted-foreground flex items-center gap-1">
+                  <Share2 className="w-3 h-3" /> Shared with
+                </p>
+                {groceryShares.map((share) => {
+                  const p = sharedRecipientMap[share.to_user_id];
+                  return (
+                    <div key={share.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-body">
+                        {p?.display_name?.[0]?.toUpperCase() || "?"}
+                      </div>
+                      <span className="text-xs font-body text-foreground flex-1">{p?.display_name || "Friend"}</span>
+                      <span className="text-[10px] font-body text-muted-foreground">
+                        {new Date(share.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Share grocery list */}
             {groceryItems.length > 0 && friendUserIds.length > 0 && (
               <div className="space-y-2">
@@ -663,7 +686,8 @@ const MealSection = () => {
                                 { onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); } }
                               );
                             }}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                            disabled={shareItem.isPending}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors disabled:opacity-50"
                           >
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-body">
                               {p?.display_name?.[0]?.toUpperCase() || "?"}
@@ -676,6 +700,13 @@ const MealSection = () => {
                   )}
                 </AnimatePresence>
               </div>
+            )}
+
+            {/* No friends hint */}
+            {groceryItems.length > 0 && friendUserIds.length === 0 && (
+              <p className="text-center text-[11px] font-body text-muted-foreground/50 py-2">
+                Add friends in Profile to share your grocery list 👥
+              </p>
             )}
           </div>
         </>
