@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, isToday, isThisWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
 import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useFriends, useProfilesByIds, useShareItem, type Profile } from "@/hooks/useProfile";
+import { useFriends, useProfilesByIds, useShareItem, useMySharedItems, type Profile } from "@/hooks/useProfile";
 import {
   useMealsByDate,
   useMealsByWeek,
