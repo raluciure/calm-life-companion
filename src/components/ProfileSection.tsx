@@ -377,7 +377,6 @@ const FriendsTab = () => {
 // ---- Shared Tab ----
 const SharedTab = () => {
   const { data: sharedItems = [] } = useSharedWithMe();
-  const { data: friends = [] } = useFriends();
 
   const allUserIds = useMemo(() => {
     return [...new Set(sharedItems.map((s) => s.from_user_id))];
@@ -411,20 +410,43 @@ const SharedTab = () => {
         sharedItems.map((item) => {
           const sender = profileMap[item.from_user_id];
           const t = typeLabels[item.item_type] || { emoji: "📎", label: item.item_type };
+          const isGrocery = item.item_type === "grocery_list";
+          const groceryItemsList = isGrocery && item.message ? item.message.split(", ").filter(Boolean) : [];
+
           return (
-            <div key={item.id} className="p-3 rounded-xl bg-secondary/30 space-y-1">
+            <div key={item.id} className="p-3 rounded-xl bg-secondary/30 space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm">{t.emoji}</span>
-                <span className="text-xs font-body text-muted-foreground">
-                  {sender?.display_name || "Someone"} shared a {t.label.toLowerCase()}
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-sm">
+                  {sender?.display_name?.[0]?.toUpperCase() || "?"}
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs font-body text-foreground font-medium">
+                    {sender?.display_name || "Someone"}
+                  </span>
+                  <span className="text-xs font-body text-muted-foreground ml-1">
+                    shared a {t.label.toLowerCase()} {t.emoji}
+                  </span>
+                </div>
+                <span className="text-[10px] font-body text-muted-foreground/50">
+                  {new Date(item.created_at).toLocaleDateString()}
                 </span>
               </div>
-              {item.message && (
-                <p className="text-sm font-body text-foreground pl-6">"{item.message}"</p>
-              )}
-              <p className="text-[10px] font-body text-muted-foreground/50 pl-6">
-                {new Date(item.created_at).toLocaleDateString()}
-              </p>
+
+              {/* Grocery list items rendered as a checklist */}
+              {isGrocery && groceryItemsList.length > 0 ? (
+                <div className="pl-2 space-y-1">
+                  {groceryItemsList.map((name, idx) => (
+                    <div key={idx} className="flex items-center gap-2 py-0.5">
+                      <div className="w-4 h-4 rounded border border-border/50 flex items-center justify-center">
+                        <span className="text-[8px] text-muted-foreground/50">•</span>
+                      </div>
+                      <span className="text-sm font-body text-foreground">{name}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : item.message ? (
+                <p className="text-sm font-body text-foreground pl-9">"{item.message}"</p>
+              ) : null}
             </div>
           );
         })
