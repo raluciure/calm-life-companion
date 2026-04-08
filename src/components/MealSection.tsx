@@ -54,14 +54,27 @@ const MealSection = () => {
   // Friends for sharing
   const { data: friends = [] } = useFriends();
   const shareItem = useShareItem();
+  const { data: mySharedItems = [] } = useMySharedItems();
   const [myUserId, setMyUserId] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
   }, []);
-  const friendUserIds = friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id).filter(Boolean);
+  const friendUserIds = useMemo(() => {
+    if (!myUserId) return [];
+    return friends.map((f) => f.requester_id === myUserId ? f.addressee_id : f.requester_id).filter(Boolean);
+  }, [friends, myUserId]);
   const { data: friendProfiles = [] } = useProfilesByIds(friendUserIds);
   const friendProfileMap: Record<string, Profile> = {};
   friendProfiles.forEach((p) => (friendProfileMap[p.user_id] = p));
+
+  // Shared grocery recipients
+  const groceryShares = useMemo(() => {
+    return mySharedItems.filter(s => s.item_type === "grocery_list");
+  }, [mySharedItems]);
+  const sharedRecipientIds = useMemo(() => [...new Set(groceryShares.map(s => s.to_user_id))], [groceryShares]);
+  const { data: sharedRecipientProfiles = [] } = useProfilesByIds(sharedRecipientIds);
+  const sharedRecipientMap: Record<string, Profile> = {};
+  sharedRecipientProfiles.forEach((p) => (sharedRecipientMap[p.user_id] = p));
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
