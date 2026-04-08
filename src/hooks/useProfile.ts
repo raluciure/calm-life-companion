@@ -277,7 +277,10 @@ export function useShareItem() {
         .insert({ ...item, from_user_id: user.id });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["shared_with_me"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["shared_with_me"] });
+      qc.invalidateQueries({ queryKey: ["my_shared_items"] });
+    },
   });
 }
 
