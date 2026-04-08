@@ -248,6 +248,24 @@ export function useSharedWithMe() {
   });
 }
 
+export function useMySharedItems() {
+  return useQuery({
+    queryKey: ["my_shared_items"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("shared_items")
+        .select("*")
+        .eq("from_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []) as SharedItem[];
+    },
+  });
+}
+
 export function useShareItem() {
   const qc = useQueryClient();
   return useMutation({
