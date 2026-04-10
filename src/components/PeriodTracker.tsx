@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -103,51 +103,19 @@ const PeriodTracker = () => {
             const hasSymptoms = symptomsByDate.has(dateStr);
             const isSelected = selectedDate === dateStr;
 
-            let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-
             return (
-              <button
+              <DayButton
                 key={dateStr}
-                onClick={() => {
-                  if (!inMonth) return;
-                  toggleDay.mutate({ date: dateStr });
-                }}
-                onTouchStart={() => {
-                  if (!inMonth) return;
-                  longPressTimer = setTimeout(() => {
-                    setSelectedDate(dateStr);
-                    longPressTimer = null;
-                  }, 500);
-                }}
-                onTouchEnd={(e) => {
-                  if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                  } else if (selectedDate === dateStr) {
-                    // Long press just fired, prevent the click
-                    e.preventDefault();
-                  }
-                }}
-                onTouchMove={() => {
-                  if (longPressTimer) {
-                    clearTimeout(longPressTimer);
-                    longPressTimer = null;
-                  }
-                }}
-                onContextMenu={(e) => e.preventDefault()}
-                disabled={!inMonth}
-                className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative touch-manipulation
-                  ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
-                  ${today ? "ring-1 ring-primary/30" : ""}
-                  ${isSelected ? "ring-2 ring-primary" : ""}
-                  ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
-                `}
-              >
-                {format(day, "d")}
-                {(isPeriod || hasSymptoms) && (
-                  <span className={`absolute -bottom-0.5 w-1 h-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
-                )}
-              </button>
+                dateStr={dateStr}
+                day={day}
+                inMonth={inMonth}
+                today={today}
+                isPeriod={isPeriod}
+                hasSymptoms={hasSymptoms}
+                isSelected={isSelected}
+                onTap={() => toggleDay.mutate({ date: dateStr })}
+                onLongPress={() => setSelectedDate(dateStr)}
+              />
             );
           })}
         </div>
