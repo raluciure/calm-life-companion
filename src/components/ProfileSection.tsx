@@ -161,8 +161,16 @@ const MyProfileTab = () => {
           </div>
         ))}
       </div>
+
+      {/* Log out */}
+      <button
+        onClick={() => supabase.auth.signOut()}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/40 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all text-sm font-body"
+      >
+        <LogOut className="w-4 h-4" />
+        <span>Log out</span>
+      </button>
     </motion.div>
-  );
 };
 
 // ---- Friends Tab ----
