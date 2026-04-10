@@ -81,6 +81,7 @@ const DayButton = ({
   );
 };
 
+const PeriodTracker = () => {
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const monthStr = format(viewDate, "yyyy-MM");
