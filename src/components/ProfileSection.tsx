@@ -171,6 +171,7 @@ const MyProfileTab = () => {
         <span>Log out</span>
       </button>
     </motion.div>
+  );
 };
 
 // ---- Friends Tab ----
