@@ -162,7 +162,7 @@ const PeriodTracker = () => {
         )}
 
         <p className="text-[10px] font-body text-muted-foreground/40 mt-2 italic">
-          Tap a day to select · tap again to toggle period
+          Tap to toggle period · long-press to log symptoms
         </p>
       </div>
 
