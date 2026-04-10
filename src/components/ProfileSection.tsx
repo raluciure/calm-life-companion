@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight } from "lucide-react";
+import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useMyProfile,
@@ -161,6 +161,15 @@ const MyProfileTab = () => {
           </div>
         ))}
       </div>
+
+      {/* Log out */}
+      <button
+        onClick={() => supabase.auth.signOut()}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/40 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all text-sm font-body"
+      >
+        <LogOut className="w-4 h-4" />
+        <span>Log out</span>
+      </button>
     </motion.div>
   );
 };
