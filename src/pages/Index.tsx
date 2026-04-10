@@ -87,16 +87,6 @@ const MainApp = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-4 sm:px-5 py-6 sm:py-8 space-y-5 sm:space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div />
-          <button
-            onClick={handleSignOut}
-            className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
 
         {section === "timeline" && <Greeting />}
 
@@ -220,47 +210,24 @@ const MainApp = () => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border/50">
-        <div className="max-w-md mx-auto flex">
-          <button
-            onClick={() => setSection("timeline")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
-              ${section === "timeline" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
-          >
-            <CalendarIcon className="w-5 h-5" />
-            <span className="text-[10px] font-body font-medium">Schedule</span>
-          </button>
-          <button
-            onClick={() => setSection("health")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
-              ${section === "health" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
-          >
-            <Heart className="w-5 h-5" />
-            <span className="text-[10px] font-body font-medium">Health</span>
-          </button>
-          <button
-            onClick={() => setSection("gym")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
-              ${section === "gym" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
-          >
-            <Dumbbell className="w-5 h-5" />
-            <span className="text-[10px] font-body font-medium">Gym</span>
-          </button>
-          <button
-            onClick={() => setSection("meals")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
-              ${section === "meals" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
-          >
-            <UtensilsCrossed className="w-5 h-5" />
-            <span className="text-[10px] font-body font-medium">Meals</span>
-          </button>
-          <button
-            onClick={() => setSection("profile")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
-              ${section === "profile" ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
-          >
-            <User className="w-5 h-5" />
-            <span className="text-[10px] font-body font-medium">Profile</span>
-          </button>
+        <div className="max-w-md mx-auto flex pb-[env(safe-area-inset-bottom)]">
+          {([
+            { key: "timeline" as const, icon: CalendarIcon, label: "Schedule" },
+            { key: "health" as const, icon: Heart, label: "Health" },
+            { key: "gym" as const, icon: Dumbbell, label: "Gym" },
+            { key: "meals" as const, icon: UtensilsCrossed, label: "Meals" },
+            { key: "profile" as const, icon: User, label: "Profile" },
+          ]).map((nav) => (
+            <button
+              key={nav.key}
+              onClick={() => setSection(nav.key)}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors
+                ${section === nav.key ? "text-primary" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+            >
+              <nav.icon className="w-5 h-5" />
+              <span className="text-[10px] font-body font-medium">{nav.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
