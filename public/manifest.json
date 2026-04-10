@@ -1,0 +1,21 @@
+{
+  "name": "Calm-Life Planner",
+  "short_name": "Calm Life",
+  "description": "Ralu's own personal assistant planner.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#f5c6c6",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
