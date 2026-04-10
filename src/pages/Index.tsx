@@ -68,7 +68,7 @@ const MainApp = () => {
     setViewMode("day");
   };
 
-  const handleSignOut = () => supabase.auth.signOut();
+  
 
   const parseTime = (t: string) => {
     const match = t.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
