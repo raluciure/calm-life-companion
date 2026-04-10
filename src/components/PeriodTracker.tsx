@@ -103,20 +103,40 @@ const PeriodTracker = () => {
             const hasSymptoms = symptomsByDate.has(dateStr);
             const isSelected = selectedDate === dateStr;
 
+            let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
             return (
               <button
                 key={dateStr}
                 onClick={() => {
                   if (!inMonth) return;
-                  if (selectedDate === dateStr) {
-                    // Second tap toggles period
-                    toggleDay.mutate({ date: dateStr });
-                  } else {
+                  toggleDay.mutate({ date: dateStr });
+                }}
+                onTouchStart={() => {
+                  if (!inMonth) return;
+                  longPressTimer = setTimeout(() => {
                     setSelectedDate(dateStr);
+                    longPressTimer = null;
+                  }, 500);
+                }}
+                onTouchEnd={(e) => {
+                  if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                  } else if (selectedDate === dateStr) {
+                    // Long press just fired, prevent the click
+                    e.preventDefault();
                   }
                 }}
+                onTouchMove={() => {
+                  if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                  }
+                }}
+                onContextMenu={(e) => e.preventDefault()}
                 disabled={!inMonth}
-                className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative
+                className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative touch-manipulation
                   ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
                   ${today ? "ring-1 ring-primary/30" : ""}
                   ${isSelected ? "ring-2 ring-primary" : ""}
