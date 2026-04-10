@@ -15,7 +15,72 @@ const SYMPTOMS = [
   { key: "nausea", emoji: "🤢", label: "Nausea" },
 ];
 
-const PeriodTracker = () => {
+// Separate component to properly handle touch with refs
+const DayButton = ({
+  dateStr, day, inMonth, today, isPeriod, hasSymptoms, isSelected, onTap, onLongPress,
+}: {
+  dateStr: string; day: Date; inMonth: boolean; today: boolean;
+  isPeriod: boolean; hasSymptoms: boolean; isSelected: boolean;
+  onTap: () => void; onLongPress: () => void;
+}) => {
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPress = useRef(false);
+
+  const handleTouchStart = useCallback(() => {
+    if (!inMonth) return;
+    didLongPress.current = false;
+    longPressRef.current = setTimeout(() => {
+      didLongPress.current = true;
+      onLongPress();
+      longPressRef.current = null;
+    }, 500);
+  }, [inMonth, onLongPress]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current);
+      longPressRef.current = null;
+    }
+    if (didLongPress.current) {
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current);
+      longPressRef.current = null;
+    }
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (!inMonth || didLongPress.current) return;
+    onTap();
+  }, [inMonth, onTap]);
+
+  return (
+    <button
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
+      onContextMenu={(e) => e.preventDefault()}
+      disabled={!inMonth}
+      className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative touch-manipulation
+        ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
+        ${today ? "ring-1 ring-primary/30" : ""}
+        ${isSelected ? "ring-2 ring-primary" : ""}
+        ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
+      `}
+    >
+      {format(day, "d")}
+      {(isPeriod || hasSymptoms) && (
+        <span className={`absolute -bottom-0.5 w-1 h-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
+      )}
+    </button>
+  );
+};
+
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const monthStr = format(viewDate, "yyyy-MM");
