@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { usePeriodLogs, useTogglePeriodDay, usePeriodSymptoms, useToggleSymptom } from "@/hooks/useHealth";
 
 const SYMPTOMS = [
@@ -15,13 +15,24 @@ const SYMPTOMS = [
   { key: "nausea", emoji: "🤢", label: "Nausea" },
 ];
 
-// Separate component to properly handle taps and long-presses with refs
 const DayButton = ({
-  dateStr, day, inMonth, today, isPeriod, hasSymptoms, isSelected, onTap, onLongPress,
+  day,
+  inMonth,
+  today,
+  isPeriod,
+  hasSymptoms,
+  isSelected,
+  onTap,
+  onLongPress,
 }: {
-  dateStr: string; day: Date; inMonth: boolean; today: boolean;
-  isPeriod: boolean; hasSymptoms: boolean; isSelected: boolean;
-  onTap: () => void; onLongPress: () => void;
+  day: Date;
+  inMonth: boolean;
+  today: boolean;
+  isPeriod: boolean;
+  hasSymptoms: boolean;
+  isSelected: boolean;
+  onTap: () => void;
+  onLongPress: () => void;
 }) => {
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
@@ -35,9 +46,8 @@ const DayButton = ({
 
   useEffect(() => () => clearLongPressTimer(), [clearLongPressTimer]);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+  const startLongPress = useCallback(() => {
     if (!inMonth) return;
-    if (e.pointerType === "mouse" && e.button !== 0) return;
 
     didLongPress.current = false;
     clearLongPressTimer();
@@ -49,10 +59,25 @@ const DayButton = ({
     }, 450);
   }, [clearLongPressTimer, inMonth, onLongPress]);
 
-  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!inMonth) return;
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (e.button !== 0) return;
+    startLongPress();
+  }, [startLongPress]);
 
+  const handlePressEnd = useCallback(() => {
     clearLongPressTimer();
+  }, [clearLongPressTimer]);
+
+  const handlePressCancel = useCallback(() => {
+    clearLongPressTimer();
+    didLongPress.current = false;
+  }, [clearLongPressTimer]);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!inMonth) {
+      e.preventDefault();
+      return;
+    }
 
     if (didLongPress.current) {
       e.preventDefault();
@@ -61,12 +86,7 @@ const DayButton = ({
     }
 
     onTap();
-  }, [clearLongPressTimer, inMonth, onTap]);
-
-  const handlePointerCancel = useCallback(() => {
-    clearLongPressTimer();
-    didLongPress.current = false;
-  }, [clearLongPressTimer]);
+  }, [inMonth, onTap]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (!inMonth) return;
@@ -80,18 +100,20 @@ const DayButton = ({
   return (
     <button
       type="button"
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerCancel}
-      onPointerCancel={handlePointerCancel}
+      onTouchStart={startLongPress}
+      onTouchEnd={handlePressEnd}
+      onTouchCancel={handlePressCancel}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handlePressEnd}
+      onMouseLeave={handlePressCancel}
       onKeyDown={handleKeyDown}
-      onClick={(e) => e.preventDefault()}
+      onClick={handleClick}
       onContextMenu={(e) => e.preventDefault()}
       disabled={!inMonth}
       aria-pressed={isPeriod}
       aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
-      className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative touch-manipulation
-        ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
+      className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation
+        ${!inMonth ? "cursor-default opacity-20" : "cursor-pointer hover:bg-secondary/60"}
         ${today ? "ring-1 ring-primary/30" : ""}
         ${isSelected ? "ring-2 ring-primary" : ""}
         ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
@@ -99,7 +121,7 @@ const DayButton = ({
     >
       {format(day, "d")}
       {(isPeriod || hasSymptoms) && (
-        <span className={`absolute -bottom-0.5 w-1 h-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
+        <span className={`absolute -bottom-0.5 h-1 w-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
       )}
     </button>
   );
@@ -108,40 +130,58 @@ const DayButton = ({
 const PeriodTracker = () => {
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isSymptomsOpen, setIsSymptomsOpen] = useState(false);
   const monthStr = format(viewDate, "yyyy-MM");
   const { data: logs = [] } = usePeriodLogs(monthStr);
   const { data: symptoms = [] } = usePeriodSymptoms(monthStr);
   const toggleDay = useTogglePeriodDay();
   const toggleSymptom = useToggleSymptom();
 
-  const periodDates = new Set(logs.map((l) => l.date));
+  const periodDates = new Set(logs.map((log) => log.date));
 
   const monthStart = startOfMonth(viewDate);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const days: Date[] = [];
-  let d = calStart;
+  let cursor = calStart;
+
   while (days.length < 42) {
-    days.push(d);
-    d = addDays(d, 1);
+    days.push(cursor);
+    cursor = addDays(cursor, 1);
   }
+
   while (days.length > 35) {
     const lastWeek = days.slice(-7);
     if (lastWeek.every((day) => !isSameMonth(day, viewDate))) {
       days.splice(-7);
-    } else break;
+    } else {
+      break;
+    }
   }
 
   const weekdays = ["M", "T", "W", "T", "F", "S", "S"];
   const sortedDates = [...periodDates].sort();
 
-  // Build symptom map: date -> Set of symptom keys
   const symptomsByDate = new Map<string, Set<string>>();
-  symptoms.forEach((s) => {
-    if (!symptomsByDate.has(s.date)) symptomsByDate.set(s.date, new Set());
-    symptomsByDate.get(s.date)!.add(s.symptom);
+  symptoms.forEach((symptom) => {
+    if (!symptomsByDate.has(symptom.date)) {
+      symptomsByDate.set(symptom.date, new Set());
+    }
+    symptomsByDate.get(symptom.date)?.add(symptom.symptom);
   });
 
   const selectedSymptoms = selectedDate ? symptomsByDate.get(selectedDate) || new Set() : new Set();
+  const selectedDateLabel = selectedDate ? format(new Date(`${selectedDate}T00:00:00`), "MMM d") : null;
+
+  const handleSelectDate = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    setIsSymptomsOpen(false);
+  };
+
+  const handleTogglePeriod = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    setIsSymptomsOpen(false);
+    toggleDay.mutate({ date: dateStr });
+  };
 
   return (
     <motion.div
@@ -150,40 +190,39 @@ const PeriodTracker = () => {
       className="space-y-3"
     >
       <div className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-display font-medium text-foreground flex items-center gap-2">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-sm font-display font-medium text-foreground">
             🌸 Period Tracker
           </h3>
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={() => setViewDate(subMonths(viewDate, 1))}
-              className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              className="rounded-lg p-1 text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </button>
-            <span className="text-[11px] font-body text-muted-foreground min-w-[70px] text-center">
+            <span className="min-w-[70px] text-center text-[11px] font-body text-muted-foreground">
               {format(viewDate, "MMM yyyy")}
             </span>
             <button
+              type="button"
               onClick={() => setViewDate(addMonths(viewDate, 1))}
-              className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              className="rounded-lg p-1 text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {weekdays.map((wd, i) => (
-            <div key={i} className="text-center text-[9px] font-body text-muted-foreground/50 uppercase py-0.5">
-              {wd}
+        <div className="mb-1 grid grid-cols-7">
+          {weekdays.map((weekday) => (
+            <div key={weekday} className="py-0.5 text-center text-[9px] font-body uppercase text-muted-foreground/50">
+              {weekday}
             </div>
           ))}
         </div>
 
-        {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-0.5">
           {days.map((day) => {
             const dateStr = format(day, "yyyy-MM-dd");
@@ -196,77 +235,92 @@ const PeriodTracker = () => {
             return (
               <DayButton
                 key={dateStr}
-                dateStr={dateStr}
                 day={day}
                 inMonth={inMonth}
                 today={today}
                 isPeriod={isPeriod}
                 hasSymptoms={hasSymptoms}
                 isSelected={isSelected}
-                onTap={() => toggleDay.mutate({ date: dateStr })}
-                onLongPress={() => setSelectedDate(dateStr)}
+                onTap={() => handleSelectDate(dateStr)}
+                onLongPress={() => handleTogglePeriod(dateStr)}
               />
             );
           })}
         </div>
 
-        {/* Cycle info */}
-        {sortedDates.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-border/50">
+        <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
+          {sortedDates.length > 0 && (
             <p className="text-[11px] font-body text-muted-foreground">
               {sortedDates.length} day{sortedDates.length !== 1 ? "s" : ""} logged this month
             </p>
-          </div>
-        )}
+          )}
 
-        <p className="text-[10px] font-body text-muted-foreground/40 mt-2 italic">
-          Tap to toggle period · long-press to log symptoms
+          <div className="flex items-center justify-between gap-3">
+            <p className="min-w-0 text-[11px] font-body text-muted-foreground">
+              {selectedDateLabel ? `Selected ${selectedDateLabel}` : "Tap a day to select it"}
+            </p>
+            <button
+              type="button"
+              onClick={() => selectedDate && setIsSymptomsOpen(true)}
+              disabled={!selectedDate}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-secondary/50 px-3 py-2 text-[11px] font-body font-medium text-foreground transition-all hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Symptoms
+            </button>
+          </div>
+        </div>
+
+        <p className="mt-2 text-[10px] font-body italic text-muted-foreground/40">
+          Long-press to log period · tap a day, then use + Symptoms
         </p>
       </div>
 
-      {/* Symptom panel for selected date */}
       <AnimatePresence>
-        {selectedDate && (
+        {selectedDate && isSymptomsOpen && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3 flex items-center justify-between">
               <h4 className="text-sm font-display font-medium text-foreground">
-                {format(new Date(selectedDate + "T00:00:00"), "MMM d")} — Symptoms
+                {selectedDateLabel} — Symptoms
               </h4>
               <button
-                onClick={() => setSelectedDate(null)}
-                className="text-[10px] font-body text-muted-foreground hover:text-foreground transition-colors"
+                type="button"
+                onClick={() => setIsSymptomsOpen(false)}
+                className="text-[10px] font-body text-muted-foreground transition-colors hover:text-foreground"
               >
                 Close
               </button>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {SYMPTOMS.map((s) => {
-                const active = selectedSymptoms.has(s.key);
+              {SYMPTOMS.map((symptom) => {
+                const active = selectedSymptoms.has(symptom.key);
+
                 return (
                   <button
-                    key={s.key}
-                    onClick={() => toggleSymptom.mutate({ date: selectedDate, symptom: s.key })}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-body transition-all
+                    key={symptom.key}
+                    type="button"
+                    onClick={() => toggleSymptom.mutate({ date: selectedDate, symptom: symptom.key })}
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-body transition-all
                       ${active
                         ? "bg-primary/15 text-primary ring-1 ring-primary/30 font-medium"
                         : "bg-secondary/40 text-muted-foreground hover:bg-secondary/70"
                       }`}
                   >
-                    <span>{s.emoji}</span>
-                    <span>{s.label}</span>
+                    <span>{symptom.emoji}</span>
+                    <span>{symptom.label}</span>
                   </button>
                 );
               })}
             </div>
 
             {periodDates.has(selectedDate) && (
-              <p className="text-[10px] font-body text-period-active mt-3 italic">
+              <p className="mt-3 text-[10px] font-body italic text-period-active">
                 🌸 Period logged for this day
               </p>
             )}
