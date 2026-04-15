@@ -85,7 +85,7 @@ const MainApp = () => {
   const untimedItems = items.filter((i) => !i.time);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100svh] bg-background">
       <div className="max-w-md mx-auto px-4 sm:px-5 py-6 sm:py-8 space-y-5 sm:space-y-6">
 
         {section === "timeline" && <Greeting />}
@@ -253,7 +253,7 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="min-h-[100svh] bg-background flex items-center justify-center">
         <p className="text-muted-foreground/50 font-display text-lg animate-gentle-pulse">hush</p>
       </div>
     );

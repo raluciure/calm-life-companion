@@ -29,7 +29,7 @@ const AuthGate = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-5">
+    <div className="min-h-[100svh] bg-background flex items-center justify-center px-5">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
