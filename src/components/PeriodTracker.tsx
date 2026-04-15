@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -15,7 +15,7 @@ const SYMPTOMS = [
   { key: "nausea", emoji: "🤢", label: "Nausea" },
 ];
 
-// Separate component to properly handle touch with refs
+// Separate component to properly handle taps and long-presses with refs
 const DayButton = ({
   dateStr, day, inMonth, today, isPeriod, hasSymptoms, isSelected, onTap, onLongPress,
 }: {
@@ -26,46 +26,70 @@ const DayButton = ({
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
 
-  const handleTouchStart = useCallback(() => {
+  const clearLongPressTimer = useCallback(() => {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current);
+      longPressRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearLongPressTimer(), [clearLongPressTimer]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
     if (!inMonth) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
     didLongPress.current = false;
+    clearLongPressTimer();
+
     longPressRef.current = setTimeout(() => {
       didLongPress.current = true;
       onLongPress();
       longPressRef.current = null;
-    }, 500);
-  }, [inMonth, onLongPress]);
+    }, 450);
+  }, [clearLongPressTimer, inMonth, onLongPress]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!inMonth) return;
+
+    clearLongPressTimer();
+
     if (didLongPress.current) {
       e.preventDefault();
+      didLongPress.current = false;
+      return;
     }
-  }, []);
 
-  const handleTouchMove = useCallback(() => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
-  }, []);
-
-  const handleClick = useCallback(() => {
-    if (!inMonth || didLongPress.current) return;
     onTap();
+  }, [clearLongPressTimer, inMonth, onTap]);
+
+  const handlePointerCancel = useCallback(() => {
+    clearLongPressTimer();
+    didLongPress.current = false;
+  }, [clearLongPressTimer]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!inMonth) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onTap();
+    }
   }, [inMonth, onTap]);
 
   return (
     <button
-      onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
+      type="button"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerCancel}
+      onPointerCancel={handlePointerCancel}
+      onKeyDown={handleKeyDown}
+      onClick={(e) => e.preventDefault()}
       onContextMenu={(e) => e.preventDefault()}
       disabled={!inMonth}
+      aria-pressed={isPeriod}
+      aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
       className={`aspect-square flex items-center justify-center rounded-full text-[11px] font-body transition-all relative touch-manipulation
         ${!inMonth ? "opacity-20 cursor-default" : "cursor-pointer hover:bg-secondary/60"}
         ${today ? "ring-1 ring-primary/30" : ""}
