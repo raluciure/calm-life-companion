@@ -1,28 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Heart, Dumbbell, UtensilsCrossed, ChevronDown } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-
-// Lazy-load the actual section components
+import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays } from "date-fns";
 import HealthSection from "./HealthSection";
 import GymSection from "./GymSection";
 import MealSection from "./MealSection";
+import ViewSwitcher, { type ViewMode } from "./ViewSwitcher";
+import DateNavigator from "./DateNavigator";
+import TimelineItem, { type TimelineItemData } from "./TimelineItem";
+import QuickAdd from "./QuickAdd";
+import TomorrowPreview from "./TomorrowPreview";
+import FreeTimeMessage from "./FreeTimeMessage";
+import WeeklyView from "./WeeklyView";
+import MonthlyView from "./MonthlyView";
+import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 
 type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
 
-const sections: { key: DailyLifeSection; icon: typeof CalendarDays; label: string; emoji: string }[] = [
-  { key: "schedule", icon: CalendarDays, label: "Schedule", emoji: "📅" },
-  { key: "health", icon: Heart, label: "Health", emoji: "🫶" },
-  { key: "gym", icon: Dumbbell, label: "Gym", emoji: "🏋️" },
-  { key: "meals", icon: UtensilsCrossed, label: "Meals", emoji: "🍽️" },
+const sections: { key: DailyLifeSection; label: string; emoji: string }[] = [
+  { key: "schedule", label: "Schedule", emoji: "📅" },
+  { key: "health", label: "Health", emoji: "🫶" },
+  { key: "gym", label: "Gym", emoji: "🏋️" },
+  { key: "meals", label: "Meals", emoji: "🍽️" },
 ];
 
-interface DailyLifeProps {
-  initialSection?: DailyLifeSection;
-}
+const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
-const DailyLife = ({ initialSection }: DailyLifeProps) => {
-  const [activeSection, setActiveSection] = useState<DailyLifeSection | null>(initialSection || null);
+const DailyLife = () => {
+  const [activeSection, setActiveSection] = useState<DailyLifeSection | null>(null);
 
   return (
     <motion.div
@@ -40,7 +45,6 @@ const DailyLife = ({ initialSection }: DailyLifeProps) => {
         </p>
       </div>
 
-      {/* Section cards */}
       <div className="space-y-2">
         {sections.map((sec) => {
           const isOpen = activeSection === sec.key;
@@ -82,24 +86,10 @@ const DailyLife = ({ initialSection }: DailyLifeProps) => {
   );
 };
 
-// Renders the inner content for each section
-import { useState as useS, useEffect, useMemo } from "react";
-import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays } from "date-fns";
-import ViewSwitcher, { type ViewMode } from "./ViewSwitcher";
-import DateNavigator from "./DateNavigator";
-import TimelineItem, { type TimelineItemData } from "./TimelineItem";
-import QuickAdd from "./QuickAdd";
-import TomorrowPreview from "./TomorrowPreview";
-import FreeTimeMessage from "./FreeTimeMessage";
-import WeeklyView from "./WeeklyView";
-import MonthlyView from "./MonthlyView";
-import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
-
-const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
-
+// ── Schedule content (moved from Index.tsx) ──
 const ScheduleContent = () => {
-  const [selectedDate, setSelectedDate] = useS(new Date());
-  const [viewMode, setViewMode] = useS<ViewMode>("day");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>("day");
   const dateStr = toDateStr(selectedDate);
   const viewingToday = isToday(selectedDate);
 
@@ -220,16 +210,11 @@ const ScheduleContent = () => {
 
 const SectionContent = ({ section }: { section: DailyLifeSection }) => {
   switch (section) {
-    case "schedule":
-      return <ScheduleContent />;
-    case "health":
-      return <HealthSection />;
-    case "gym":
-      return <GymSection />;
-    case "meals":
-      return <MealSection />;
-    default:
-      return null;
+    case "schedule": return <ScheduleContent />;
+    case "health": return <HealthSection />;
+    case "gym": return <GymSection />;
+    case "meals": return <MealSection />;
+    default: return null;
   }
 };
 
