@@ -682,8 +682,11 @@ const MealSection = () => {
                             onClick={() => {
                               const itemNames = groceryItems.filter(i => !i.checked).map(i => i.name).join(", ");
                               shareItem.mutate(
-                                { to_user_id: fid, item_type: "grocery_list", item_id: "grocery", message: itemNames },
-                                { onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); } }
+                                { to_user_id: fid, item_type: "grocery_list", item_id: crypto.randomUUID(), message: itemNames },
+                                {
+                                  onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); },
+                                  onError: (err: any) => toast.error(err?.message || "Couldn't share — try again"),
+                                }
                               );
                             }}
                             disabled={shareItem.isPending}
