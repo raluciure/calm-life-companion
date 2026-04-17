@@ -35,14 +35,15 @@ const DailyLife = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.25 }}
-        className="space-y-4"
+        className="space-y-4 relative"
       >
         <button
           onClick={() => setActiveSection(null)}
-          className="flex items-center gap-1.5 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute left-0 top-1 z-10 flex items-center gap-1.5 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Back to Daily Life"
         >
           <ArrowLeft className="w-4 h-4" />
-          Daily Life
+          <span className="hidden xs:inline">Daily Life</span>
         </button>
 
         {activeSection === "schedule" && <ScheduleContent />}
