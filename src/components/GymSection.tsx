@@ -407,7 +407,7 @@ const GymSection = () => {
               No workouts this week
             </p>
           ) : (
-            <div className="space-y-2">{weeklyWorkouts.map(renderWorkoutCard)}</div>
+            <div className="space-y-2">{weeklyWorkouts.filter((w) => w.id !== editingId).map(renderWorkoutCard)}</div>
           )}
         </div>
       )}
@@ -426,7 +426,7 @@ const GymSection = () => {
               No workouts yet — start logging 🏋️
             </p>
           ) : (
-            <div className="space-y-2">{workouts.map(renderWorkoutCard)}</div>
+            <div className="space-y-2">{workouts.filter((w) => w.id !== editingId).map(renderWorkoutCard)}</div>
           )}
         </>
       )}
