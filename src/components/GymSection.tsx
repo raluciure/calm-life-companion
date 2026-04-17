@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Clock, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { useWorkouts, useAddWorkout, useUpdateWorkout, useDeleteWorkout, type Exercise, type Workout } from "@/hooks/useWorkouts";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, isWithinInterval, parseISO } from "date-fns";
+import ShareWithFriends from "./ShareWithFriends";
 
 const WORKOUT_TYPES = [
   { emoji: "💪", label: "Strength" },
@@ -186,7 +187,7 @@ const GymSection = () => {
               {w.notes && (
                 <p className="text-xs font-body text-muted-foreground italic">{w.notes}</p>
               )}
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-3 pt-1 items-center">
                 <button
                   onClick={() => startEdit(w)}
                   className="text-xs font-body text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
@@ -199,6 +200,7 @@ const GymSection = () => {
                 >
                   Delete
                 </button>
+                <ShareWithFriends itemType="workout" itemId={w.id} defaultMessage={w.title} />
               </div>
             </div>
           </motion.div>

@@ -5,6 +5,7 @@ import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, isToday, isT
 import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFriends, useProfilesByIds, useShareItem, useMySharedItems, type Profile } from "@/hooks/useProfile";
+import ShareWithFriends from "./ShareWithFriends";
 import {
   useMealsByDate,
   useMealsByWeek,
@@ -364,7 +365,7 @@ const MealSection = () => {
                                     {meal.fat != null && <span>F: {meal.fat}g</span>}
                                   </div>
                                   {meal.notes && <p className="text-[11px] font-body text-muted-foreground/70 italic">{meal.notes}</p>}
-                                  <div className="flex gap-2 pt-1">
+                                  <div className="flex gap-2 pt-1 items-center">
                                     <button
                                       onClick={(e) => { e.stopPropagation(); openEdit(meal); }}
                                       className="text-[10px] font-body text-primary hover:text-primary/80 flex items-center gap-0.5"
@@ -377,6 +378,12 @@ const MealSection = () => {
                                     >
                                       <Trash2 className="w-3 h-3" /> Delete
                                     </button>
+                                    <ShareWithFriends
+                                      itemType="meal"
+                                      itemId={meal.id}
+                                      defaultMessage={meal.title}
+                                      compact
+                                    />
                                   </div>
                                 </div>
                               </motion.div>
