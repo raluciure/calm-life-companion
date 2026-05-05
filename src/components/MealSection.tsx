@@ -68,14 +68,46 @@ const MealSection = () => {
   const friendProfileMap: Record<string, Profile> = {};
   friendProfiles.forEach((p) => (friendProfileMap[p.user_id] = p));
 
-  // Shared grocery recipients
+  // Shared grocery recipients (lists I shared)
   const groceryShares = useMemo(() => {
     return mySharedItems.filter(s => s.item_type === "grocery_list");
   }, [mySharedItems]);
   const sharedRecipientIds = useMemo(() => [...new Set(groceryShares.map(s => s.to_user_id))], [groceryShares]);
-  const { data: sharedRecipientProfiles = [] } = useProfilesByIds(sharedRecipientIds);
+
+  // Grocery lists shared with me
+  const { data: sharedWithMeAll = [] } = useSharedWithMe();
+  const sharedGroceriesWithMe = useMemo(
+    () => sharedWithMeAll.filter(s => s.item_type === "grocery_list"),
+    [sharedWithMeAll]
+  );
+  const sharedSenderIds = useMemo(
+    () => [...new Set(sharedGroceriesWithMe.map(s => s.from_user_id))],
+    [sharedGroceriesWithMe]
+  );
+  const { data: sharedRecipientProfiles = [] } = useProfilesByIds([...sharedRecipientIds, ...sharedSenderIds]);
   const sharedRecipientMap: Record<string, Profile> = {};
   sharedRecipientProfiles.forEach((p) => (sharedRecipientMap[p.user_id] = p));
+
+  // Selected grocery list view: "mine" or shared item id
+  const [selectedListId, setSelectedListId] = useState<string>("mine");
+  const selectedSharedList = useMemo(
+    () => sharedGroceriesWithMe.find(s => s.id === selectedListId),
+    [selectedListId, sharedGroceriesWithMe]
+  );
+  const sharedListItems = useMemo(() => {
+    if (!selectedSharedList?.message) return [] as string[];
+    return selectedSharedList.message.split(",").map(s => s.trim()).filter(Boolean);
+  }, [selectedSharedList]);
+  const [checkedSharedItems, setCheckedSharedItems] = useState<Record<string, Set<string>>>({});
+  const toggleSharedItem = (listId: string, name: string) => {
+    setCheckedSharedItems(prev => {
+      const next = { ...prev };
+      const set = new Set(next[listId] || []);
+      if (set.has(name)) set.delete(name); else set.add(name);
+      next[listId] = set;
+      return next;
+    });
+  };
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
