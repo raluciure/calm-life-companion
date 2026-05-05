@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, isToday, isThisWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
 import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useFriends, useProfilesByIds, useShareItem, useMySharedItems, type Profile } from "@/hooks/useProfile";
+import { useFriends, useProfilesByIds, useShareItem, useMySharedItems, useSharedWithMe, type Profile } from "@/hooks/useProfile";
 import ShareWithFriends from "./ShareWithFriends";
 import {
   useMealsByDate,
@@ -68,14 +68,46 @@ const MealSection = () => {
   const friendProfileMap: Record<string, Profile> = {};
   friendProfiles.forEach((p) => (friendProfileMap[p.user_id] = p));
 
-  // Shared grocery recipients
+  // Shared grocery recipients (lists I shared)
   const groceryShares = useMemo(() => {
     return mySharedItems.filter(s => s.item_type === "grocery_list");
   }, [mySharedItems]);
   const sharedRecipientIds = useMemo(() => [...new Set(groceryShares.map(s => s.to_user_id))], [groceryShares]);
-  const { data: sharedRecipientProfiles = [] } = useProfilesByIds(sharedRecipientIds);
+
+  // Grocery lists shared with me
+  const { data: sharedWithMeAll = [] } = useSharedWithMe();
+  const sharedGroceriesWithMe = useMemo(
+    () => sharedWithMeAll.filter(s => s.item_type === "grocery_list"),
+    [sharedWithMeAll]
+  );
+  const sharedSenderIds = useMemo(
+    () => [...new Set(sharedGroceriesWithMe.map(s => s.from_user_id))],
+    [sharedGroceriesWithMe]
+  );
+  const { data: sharedRecipientProfiles = [] } = useProfilesByIds([...sharedRecipientIds, ...sharedSenderIds]);
   const sharedRecipientMap: Record<string, Profile> = {};
   sharedRecipientProfiles.forEach((p) => (sharedRecipientMap[p.user_id] = p));
+
+  // Selected grocery list view: "mine" or shared item id
+  const [selectedListId, setSelectedListId] = useState<string>("mine");
+  const selectedSharedList = useMemo(
+    () => sharedGroceriesWithMe.find(s => s.id === selectedListId),
+    [selectedListId, sharedGroceriesWithMe]
+  );
+  const sharedListItems = useMemo(() => {
+    if (!selectedSharedList?.message) return [] as string[];
+    return selectedSharedList.message.split(",").map(s => s.trim()).filter(Boolean);
+  }, [selectedSharedList]);
+  const [checkedSharedItems, setCheckedSharedItems] = useState<Record<string, Set<string>>>({});
+  const toggleSharedItem = (listId: string, name: string) => {
+    setCheckedSharedItems(prev => {
+      const next = { ...prev };
+      const set = new Set(next[listId] || []);
+      if (set.has(name)) set.delete(name); else set.add(name);
+      next[listId] = set;
+      return next;
+    });
+  };
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
@@ -526,6 +558,73 @@ const MealSection = () => {
       {view === "grocery" && (
         <>
           <div className="space-y-3">
+            {/* List selector */}
+            {sharedGroceriesWithMe.length > 0 && (
+              <div className="flex gap-1.5 flex-wrap items-center">
+                <button
+                  onClick={() => setSelectedListId("mine")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-body transition-all ${
+                    selectedListId === "mine"
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "bg-secondary/50 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  🛒 My list
+                </button>
+                {sharedGroceriesWithMe.map((s) => {
+                  const sender = sharedRecipientMap[s.from_user_id];
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedListId(s.id)}
+                      className={`px-3 py-1.5 rounded-lg text-[11px] font-body transition-all ${
+                        selectedListId === s.id
+                          ? "bg-primary/10 text-primary border border-primary/20"
+                          : "bg-secondary/50 text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      📬 {sender?.display_name || "Friend"}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {selectedListId !== "mine" && selectedSharedList ? (
+              <div className="space-y-2">
+                <p className="text-xs font-body text-muted-foreground">
+                  Shared by {sharedRecipientMap[selectedSharedList.from_user_id]?.display_name || "a friend"} · {new Date(selectedSharedList.created_at).toLocaleDateString()}
+                </p>
+                {sharedListItems.length === 0 ? (
+                  <p className="text-center text-sm font-body text-muted-foreground/50 py-6">This list is empty</p>
+                ) : (
+                  <div className="space-y-1">
+                    {sharedListItems.map((name, idx) => {
+                      const isChecked = checkedSharedItems[selectedSharedList.id]?.has(name);
+                      return (
+                        <div
+                          key={`${name}-${idx}`}
+                          className={`flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2.5 transition-colors ${isChecked ? "opacity-50" : ""}`}
+                        >
+                          <button
+                            onClick={() => toggleSharedItem(selectedSharedList.id, name)}
+                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isChecked ? "bg-primary border-primary" : "border-border/50 hover:border-primary/50"
+                            }`}
+                          >
+                            {isChecked && <Check className="w-3 h-3 text-primary-foreground" />}
+                          </button>
+                          <span className={`flex-1 text-sm font-body ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                            {name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+            <>
             {/* Add item form */}
             <div className="flex gap-2">
               <input
@@ -717,6 +816,8 @@ const MealSection = () => {
               <p className="text-center text-[11px] font-body text-muted-foreground/50 py-2">
                 Add friends in Profile to share your grocery list 👥
               </p>
+            )}
+            </>
             )}
           </div>
         </>
