@@ -191,7 +191,7 @@ const PeriodTracker = () => {
                 hasSymptoms={hasSymptoms}
                 isSelected={isSelected}
                 onTap={() => handleSelectDate(dateStr)}
-                onLongPress={() => handleTogglePeriod(dateStr)}
+                onDoubleTap={() => handleTogglePeriod(dateStr)}
               />
             );
           })}
