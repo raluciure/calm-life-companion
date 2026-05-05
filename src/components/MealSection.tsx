@@ -817,6 +817,8 @@ const MealSection = () => {
                 Add friends in Profile to share your grocery list 👥
               </p>
             )}
+            </>
+            )}
           </div>
         </>
       )}
