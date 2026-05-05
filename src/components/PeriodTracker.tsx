@@ -221,7 +221,7 @@ const PeriodTracker = () => {
         </div>
 
         <p className="mt-2 text-[10px] font-body italic text-muted-foreground/40">
-          Long-press to log period · tap a day, then use + Symptoms
+          Double-tap a day to log period · tap to select, then use + Symptoms
         </p>
       </div>
 
