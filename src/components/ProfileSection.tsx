@@ -113,12 +113,8 @@ const MyProfileTab = () => {
       exit={{ opacity: 0, y: -8 }}
       className="space-y-4"
     >
-      {/* Avatar & Name */}
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl">
-          {profile?.display_name?.[0]?.toUpperCase() || "?"}
-        </div>
-
+      {/* Edit name */}
+      <div className="flex justify-center">
         {editing ? (
           <div className="flex items-center gap-2">
             <input
@@ -137,14 +133,13 @@ const MyProfileTab = () => {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-display font-light text-foreground">
-              {profile?.display_name || "User"}
-            </h2>
-            <button onClick={startEdit} className="p-1 text-muted-foreground/50 hover:text-muted-foreground">
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={startEdit}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            <span>Edit name</span>
+          </button>
         )}
       </div>
 
