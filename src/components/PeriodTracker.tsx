@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -15,6 +15,8 @@ const SYMPTOMS = [
   { key: "nausea", emoji: "🤢", label: "Nausea" },
 ];
 
+const DOUBLE_TAP_MS = 300;
+
 const DayButton = ({
   day,
   inMonth,
@@ -23,7 +25,7 @@ const DayButton = ({
   hasSymptoms,
   isSelected,
   onTap,
-  onLongPress,
+  onDoubleTap,
 }: {
   day: Date;
   inMonth: boolean;
@@ -32,83 +34,30 @@ const DayButton = ({
   hasSymptoms: boolean;
   isSelected: boolean;
   onTap: () => void;
-  onLongPress: () => void;
+  onDoubleTap: () => void;
 }) => {
-  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const didLongPress = useRef(false);
+  const [lastTap, setLastTap] = useState(0);
 
-  const clearLongPressTimer = useCallback(() => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => () => clearLongPressTimer(), [clearLongPressTimer]);
-
-  const startLongPress = useCallback(() => {
+  const handleClick = () => {
     if (!inMonth) return;
-
-    didLongPress.current = false;
-    clearLongPressTimer();
-
-    longPressRef.current = setTimeout(() => {
-      didLongPress.current = true;
-      onLongPress();
-      longPressRef.current = null;
-    }, 450);
-  }, [clearLongPressTimer, inMonth, onLongPress]);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button !== 0) return;
-    startLongPress();
-  }, [startLongPress]);
-
-  const handlePressEnd = useCallback(() => {
-    clearLongPressTimer();
-  }, [clearLongPressTimer]);
-
-  const handlePressCancel = useCallback(() => {
-    clearLongPressTimer();
-    didLongPress.current = false;
-  }, [clearLongPressTimer]);
-
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!inMonth) {
-      e.preventDefault();
-      return;
-    }
-
-    if (didLongPress.current) {
-      e.preventDefault();
-      didLongPress.current = false;
-      return;
-    }
-
-    onTap();
-  }, [inMonth, onTap]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (!inMonth) return;
-
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
+    const now = Date.now();
+    if (now - lastTap < DOUBLE_TAP_MS) {
+      setLastTap(0);
+      onDoubleTap();
+    } else {
+      setLastTap(now);
       onTap();
     }
-  }, [inMonth, onTap]);
+  };
 
   return (
     <button
       type="button"
-      onTouchStart={startLongPress}
-      onTouchEnd={handlePressEnd}
-      onTouchCancel={handlePressCancel}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handlePressEnd}
-      onMouseLeave={handlePressCancel}
-      onKeyDown={handleKeyDown}
       onClick={handleClick}
-      onContextMenu={(e) => e.preventDefault()}
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        if (inMonth) onDoubleTap();
+      }}
       disabled={!inMonth}
       aria-pressed={isPeriod}
       aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
@@ -242,7 +191,7 @@ const PeriodTracker = () => {
                 hasSymptoms={hasSymptoms}
                 isSelected={isSelected}
                 onTap={() => handleSelectDate(dateStr)}
-                onLongPress={() => handleTogglePeriod(dateStr)}
+                onDoubleTap={() => handleTogglePeriod(dateStr)}
               />
             );
           })}
@@ -272,7 +221,7 @@ const PeriodTracker = () => {
         </div>
 
         <p className="mt-2 text-[10px] font-body italic text-muted-foreground/40">
-          Long-press to log period · tap a day, then use + Symptoms
+          Double-tap a day to log period · tap to select, then use + Symptoms
         </p>
       </div>
 
