@@ -3,6 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const todayStr = () => new Date().toISOString().split("T")[0];
 
+// month = "YYYY-MM" → returns [startDate, endDate] strings covering the full month
+const monthRange = (month: string): [string, string] => {
+  const [y, m] = month.split("-").map(Number);
+  const startDate = `${month}-01`;
+  // last day = day 0 of next month
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const endDate = `${month}-${String(last).padStart(2, "0")}`;
+  return [startDate, endDate];
+};
+
 // ── Period Logs ──
 
 export interface PeriodLog {
