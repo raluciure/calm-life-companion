@@ -38,9 +38,20 @@ const ProfileSection = () => {
         <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-display text-primary">
           {profile?.display_name?.[0]?.toUpperCase() || "?"}
         </div>
-        <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
-          {profile?.display_name || "User"}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
+            {profile?.display_name || "User"}
+          </h1>
+          <button
+            onClick={() => {
+              setName(profile?.display_name || "");
+              setEditing(true);
+            }}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Tab switcher */}
