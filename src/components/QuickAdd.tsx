@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Plus, X } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import type { ItemCategory, TimelineItemData } from "./TimelineItem";
 
 interface QuickAddProps {
@@ -32,7 +33,6 @@ const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
 
   const formatTime = (t: string): string | undefined => {
     if (!t) return undefined;
-    // t is HH:MM from input type="time", convert to "9:00 AM"
     const [h, m] = t.split(":").map(Number);
     const ampm = h >= 12 ? "PM" : "AM";
     const h12 = h % 12 || 12;
@@ -53,8 +53,8 @@ const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
     reset();
   };
 
-  if (!open) {
-    return (
+  return (
+    <>
       <motion.button
         onClick={() => setOpen(true)}
         initial={{ opacity: 0, y: 12 }}
@@ -65,84 +65,81 @@ const QuickAdd = ({ onAdd, dateLabel }: QuickAddProps) => {
         <Plus className="w-3.5 h-3.5" />
         {dateLabel ? `Add to ${dateLabel}` : "Add task"}
       </motion.button>
-    );
-  }
 
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
-        exit={{ opacity: 0, height: 0 }}
-        className="overflow-hidden"
-      >
-        <div className="bg-secondary/30 rounded-xl p-3 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-body font-medium text-foreground">New Task</span>
-            <button onClick={reset} className="text-muted-foreground hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
+      <Drawer open={open} onOpenChange={(o) => (o ? setOpen(true) : reset())}>
+        <DrawerContent className="px-4 pb-6 max-h-[90vh]">
+          <DrawerHeader className="px-0 flex flex-row items-center justify-between">
+            <DrawerTitle className="text-base font-body font-medium">
+              {dateLabel ? `New task · ${dateLabel}` : "New task"}
+            </DrawerTitle>
+            <DrawerClose asChild>
+              <button className="text-muted-foreground hover:text-foreground p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+
+          <div className="space-y-4">
+            {/* Category selector */}
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setCategory(c.value)}
+                  className={`py-2.5 rounded-lg text-xs font-body transition-all ${
+                    category === c.value
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "bg-secondary/50 text-muted-foreground border border-transparent"
+                  }`}
+                >
+                  {c.emoji} {c.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Title */}
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What do you need to do?"
+              autoFocus
+              className="w-full bg-background/50 rounded-lg px-3 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground/50 outline-none border border-border/30 focus:border-primary/30"
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+
+            {/* Time row */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] font-body text-muted-foreground mb-1 block">Start time</label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full bg-background/50 rounded-lg px-2 py-2 text-xs font-body text-foreground outline-none border border-border/30 focus:border-primary/30"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-body text-muted-foreground mb-1 block">End time</label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full bg-background/50 rounded-lg px-2 py-2 text-xs font-body text-foreground outline-none border border-border/30 focus:border-primary/30"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim()}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-body font-medium disabled:opacity-40 transition-all"
+            >
+              Add Task
             </button>
           </div>
-
-          {/* Category selector */}
-          <div className="flex gap-1.5">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setCategory(c.value)}
-                className={`flex-1 py-1.5 rounded-lg text-[11px] font-body transition-all ${
-                  category === c.value
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "bg-secondary/50 text-muted-foreground"
-                }`}
-              >
-                {c.emoji} {c.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Title */}
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="What do you need to do?"
-            autoFocus
-            className="w-full bg-background/50 rounded-lg px-3 py-2 text-sm font-body text-foreground placeholder:text-muted-foreground/50 outline-none border border-border/30 focus:border-primary/30"
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
-
-          {/* Time row */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] font-body text-muted-foreground mb-0.5 block">Start time</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full bg-background/50 rounded-lg px-2 py-1.5 text-xs font-body text-foreground outline-none border border-border/30 focus:border-primary/30"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-body text-muted-foreground mb-0.5 block">End time</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full bg-background/50 rounded-lg px-2 py-1.5 text-xs font-body text-foreground outline-none border border-border/30 focus:border-primary/30"
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!title.trim()}
-            className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-body font-medium disabled:opacity-40 transition-all"
-          >
-            Add Task
-          </button>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 };
 
