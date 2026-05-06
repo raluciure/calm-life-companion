@@ -54,10 +54,6 @@ const DayButton = ({
     <button
       type="button"
       onClick={handleClick}
-      onDoubleClick={(e) => {
-        e.preventDefault();
-        if (inMonth) onDoubleTap();
-      }}
       disabled={!inMonth}
       aria-pressed={isPeriod}
       aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
