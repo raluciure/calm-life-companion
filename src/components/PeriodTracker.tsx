@@ -165,8 +165,8 @@ const PeriodTracker = () => {
         </div>
 
         <div className="mb-1 grid grid-cols-7">
-          {weekdays.map((weekday) => (
-            <div key={weekday} className="py-0.5 text-center text-[9px] font-body uppercase text-muted-foreground/50">
+          {weekdays.map((weekday, idx) => (
+            <div key={idx} className="py-0.5 text-center text-[9px] font-body uppercase text-muted-foreground/50">
               {weekday}
             </div>
           ))}

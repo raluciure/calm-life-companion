@@ -3,6 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const todayStr = () => new Date().toISOString().split("T")[0];
 
+// month = "YYYY-MM" → returns [startDate, endDate] strings covering the full month
+const monthRange = (month: string): [string, string] => {
+  const [y, m] = month.split("-").map(Number);
+  const startDate = `${month}-01`;
+  // last day = day 0 of next month
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const endDate = `${month}-${String(last).padStart(2, "0")}`;
+  return [startDate, endDate];
+};
+
 // ── Period Logs ──
 
 export interface PeriodLog {
@@ -17,8 +27,7 @@ export function usePeriodLogs(month: string) {
   return useQuery({
     queryKey: ["period-logs", month],
     queryFn: async () => {
-      const startDate = `${month}-01`;
-      const endDate = `${month}-31`;
+      const [startDate, endDate] = monthRange(month);
       const { data, error } = await supabase
         .from("period_logs")
         .select("*")
@@ -155,8 +164,7 @@ export function useMedLogsByMonth(month: string) {
   return useQuery({
     queryKey: ["medication-logs", "month", month],
     queryFn: async () => {
-      const startDate = `${month}-01`;
-      const endDate = `${month}-31`;
+      const [startDate, endDate] = monthRange(month);
       const { data, error } = await supabase
         .from("medication_logs")
         .select("*")
@@ -216,8 +224,7 @@ export function usePeriodSymptoms(month: string) {
   return useQuery({
     queryKey: ["period-symptoms", month],
     queryFn: async () => {
-      const startDate = `${month}-01`;
-      const endDate = `${month}-31`;
+      const [startDate, endDate] = monthRange(month);
       const { data, error } = await supabase
         .from("period_symptoms")
         .select("*")
