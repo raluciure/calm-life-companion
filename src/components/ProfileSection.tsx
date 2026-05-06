@@ -121,23 +121,7 @@ const ProfileSection = () => {
 // ---- My Profile Tab ----
 const MyProfileTab = () => {
   const { data: profile, isLoading } = useMyProfile();
-  const updateProfile = useUpdateProfile();
   const { data: stats } = useUserStats();
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState("");
-
-  const startEdit = () => {
-    setName(profile?.display_name || "");
-    setEditing(true);
-  };
-
-  const saveEdit = () => {
-    if (name.trim()) {
-      updateProfile.mutate({ display_name: name.trim() });
-      toast.success("Name updated");
-    }
-    setEditing(false);
-  };
 
   if (isLoading) {
     return (
