@@ -26,6 +26,22 @@ type ProfileTab = "profile" | "friends" | "shared";
 const ProfileSection = () => {
   const [tab, setTab] = useState<ProfileTab>("profile");
   const { data: profile } = useMyProfile();
+  const updateProfile = useUpdateProfile();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+
+  const startEdit = () => {
+    setName(profile?.display_name || "");
+    setEditing(true);
+  };
+
+  const saveEdit = () => {
+    if (name.trim()) {
+      updateProfile.mutate({ display_name: name.trim() });
+      toast.success("Name updated");
+    }
+    setEditing(false);
+  };
 
   return (
     <motion.div
@@ -38,9 +54,36 @@ const ProfileSection = () => {
         <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-display text-primary">
           {profile?.display_name?.[0]?.toUpperCase() || "?"}
         </div>
-        <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
-          {profile?.display_name || "User"}
-        </h1>
+        {editing ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-body text-sm outline-none focus:border-primary/30"
+              autoFocus
+              onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+            />
+            <button onClick={saveEdit} className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <Check className="w-4 h-4" />
+            </button>
+            <button onClick={() => setEditing(false)} className="p-1.5 rounded-lg bg-secondary text-muted-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-display font-light text-foreground">
+              {profile?.display_name || "User"}
+            </h1>
+            <button
+              onClick={startEdit}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tab switcher */}
@@ -78,23 +121,7 @@ const ProfileSection = () => {
 // ---- My Profile Tab ----
 const MyProfileTab = () => {
   const { data: profile, isLoading } = useMyProfile();
-  const updateProfile = useUpdateProfile();
   const { data: stats } = useUserStats();
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState("");
-
-  const startEdit = () => {
-    setName(profile?.display_name || "");
-    setEditing(true);
-  };
-
-  const saveEdit = () => {
-    if (name.trim()) {
-      updateProfile.mutate({ display_name: name.trim() });
-      toast.success("Name updated");
-    }
-    setEditing(false);
-  };
 
   if (isLoading) {
     return (
@@ -113,36 +140,6 @@ const MyProfileTab = () => {
       exit={{ opacity: 0, y: -8 }}
       className="space-y-4"
     >
-      {/* Edit name */}
-      <div className="flex justify-center">
-        {editing ? (
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-body text-sm outline-none focus:border-primary/30"
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && saveEdit()}
-            />
-            <button onClick={saveEdit} className="p-1.5 rounded-lg bg-primary/10 text-primary">
-              <Check className="w-4 h-4" />
-            </button>
-            <button onClick={() => setEditing(false)} className="p-1.5 rounded-lg bg-secondary text-muted-foreground">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={startEdit}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-body text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            <span>Edit name</span>
-          </button>
-        )}
-      </div>
-
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
