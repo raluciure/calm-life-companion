@@ -111,6 +111,11 @@ const HomeFeed = () => {
       <div className="space-y-2">
         <p className="text-xs font-body font-medium text-muted-foreground px-1 flex items-center gap-1.5">
           <Inbox className="w-3.5 h-3.5" /> Shared with you
+          {newCount > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+              {newCount}
+            </span>
+          )}
         </p>
         {sharedItems.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground/50 font-body italic py-6">
