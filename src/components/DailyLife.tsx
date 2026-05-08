@@ -29,6 +29,8 @@ const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
 const DailyLife = () => {
   const [activeSection, setActiveSection] = useState<DailyLifeSection | null>(null);
+  const { features } = useFeatures();
+  const sections = allSections.filter((s) => features[s.key]);
 
   if (activeSection) {
     return (
