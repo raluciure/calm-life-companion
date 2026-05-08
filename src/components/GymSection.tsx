@@ -259,20 +259,21 @@ const GymSection = () => {
         </motion.button>
       )}
 
-      {/* Add/Edit Workout Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-3 p-4 rounded-xl bg-secondary/30 border border-border/50">
-              <p className="text-xs font-body font-medium text-foreground">
-                {editingId ? "Edit Workout" : "New Workout"}
-              </p>
+      {/* Add/Edit Workout Drawer */}
+      <Drawer open={showForm} onOpenChange={(o) => (o ? setShowForm(true) : resetForm())}>
+        <DrawerContent className="px-4 pb-6 max-h-[90vh] overflow-y-auto">
+          <DrawerHeader className="px-0 flex flex-row items-center justify-between">
+            <DrawerTitle className="text-base font-body font-medium">
+              {editingId ? "Edit Workout" : "New Workout"}
+            </DrawerTitle>
+            <DrawerClose asChild>
+              <button className="text-muted-foreground hover:text-foreground p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
 
+          <div className="space-y-3">
               {/* Workout Type Picker */}
               <div className="flex flex-wrap gap-2">
                 {WORKOUT_TYPES.map((type) => (
@@ -356,19 +357,12 @@ const GymSection = () => {
                 className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-foreground font-body text-sm placeholder:text-muted-foreground/60 outline-none focus:border-primary/30 transition-all resize-none"
               />
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button onClick={resetForm} className="flex-1 py-2.5 rounded-lg border border-border text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
-                  Cancel
-                </button>
-                <button onClick={handleSubmit} disabled={!form.title.trim()} className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground font-body text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
-                  {editingId ? "Update" : "Save workout"}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <button onClick={handleSubmit} disabled={!form.title.trim()} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-body text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+                {editingId ? "Update workout" : "Save workout"}
+              </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Weekly View */}
       {gymView === "weekly" && (
