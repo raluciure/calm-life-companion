@@ -126,8 +126,12 @@ const HomeFeed = () => {
             {sharedItems.slice(0, 10).map((item) => {
               const sender = profileMap[item.from_user_id];
               const t = typeLabels[item.item_type] || { emoji: "📎", label: item.item_type };
+              const isNew = new Date(item.created_at).getTime() > lastSeen;
               return (
-                <div key={item.id} className="p-3 rounded-xl bg-secondary/30 space-y-1">
+                <div key={item.id} className="relative p-3 rounded-xl bg-secondary/30 space-y-1">
+                  {isNew && (
+                    <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-destructive" />
+                  )}
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-sm">
                       {sender?.display_name?.[0]?.toUpperCase() || "?"}
