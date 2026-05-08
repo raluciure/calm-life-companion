@@ -355,20 +355,6 @@ const MealSection = () => {
                   ) : (
                     <div className="space-y-1.5">
                       {meals.map((meal) => (
-                        editingMeal?.id === meal.id && showForm ? (
-                          <motion.div
-                            key={meal.id + "-edit"}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="bg-secondary/30 rounded-xl p-3 space-y-3"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-body font-medium text-foreground">Edit Meal</span>
-                              <button onClick={resetForm} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
-                            </div>
-                            {renderForm()}
-                          </motion.div>
-                        ) : (
                         <div
                           key={meal.id}
                           onClick={() => setExpandedId(expandedId === meal.id ? null : meal.id)}
@@ -423,7 +409,6 @@ const MealSection = () => {
                             )}
                           </AnimatePresence>
                         </div>
-                        )
                       ))}
                     </div>
                   )}
@@ -432,35 +417,32 @@ const MealSection = () => {
             })}
           </div>
 
-          {/* Add button - only show when not editing inline */}
-          {!showForm && (
-            <button
-              onClick={() => { setEditingMeal(null); setShowForm(true); }}
-              className="w-full py-3 rounded-xl border border-dashed border-border/50 text-xs font-body text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/30 transition-all flex items-center justify-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add meal
-            </button>
-          )}
+          {/* Add button */}
+          <button
+            onClick={() => { setEditingMeal(null); setShowForm(true); }}
+            className="w-full py-3 rounded-xl border border-dashed border-border/50 text-xs font-body text-muted-foreground hover:text-foreground hover:border-border hover:bg-secondary/30 transition-all flex items-center justify-center gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add meal
+          </button>
 
-          {/* New meal form (not editing) */}
-          <AnimatePresence>
-            {showForm && !editingMeal && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="bg-secondary/30 rounded-xl p-3 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-body font-medium text-foreground">New Meal</span>
-                    <button onClick={resetForm} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
-                  </div>
-                  {renderForm()}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Meal form drawer */}
+          <Drawer open={showForm} onOpenChange={(o) => (o ? setShowForm(true) : resetForm())}>
+            <DrawerContent className="px-4 pb-6 max-h-[90vh] overflow-y-auto">
+              <DrawerHeader className="px-0 flex flex-row items-center justify-between">
+                <DrawerTitle className="text-base font-body font-medium">
+                  {editingMeal ? "Edit Meal" : "New Meal"}
+                </DrawerTitle>
+                <DrawerClose asChild>
+                  <button className="text-muted-foreground hover:text-foreground p-1">
+                    <X className="w-4 h-4" />
+                  </button>
+                </DrawerClose>
+              </DrawerHeader>
+              <div className="space-y-3">
+                {renderForm()}
+              </div>
+            </DrawerContent>
+          </Drawer>
         </>
       )}
 
