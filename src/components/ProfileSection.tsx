@@ -23,7 +23,7 @@ import {
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
 
-type ProfileTab = "profile" | "friends" | "shared";
+type ProfileTab = "profile" | "friends" | "shared" | "settings";
 
 const ProfileSection = () => {
   const [tab, setTab] = useState<ProfileTab>("profile");
