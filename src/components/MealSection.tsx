@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, isToday, isThisWeek, endOfWeek, parseISO, isWithinInterval } from "date-fns";
 import { Plus, ChevronLeft, ChevronRight, X, Pencil, Trash2, Sparkles, Loader2, Check, ShoppingCart, Share2 } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { supabase } from "@/integrations/supabase/client";
 import { useFriends, useProfilesByIds, useShareItem, useMySharedItems, useSharedWithMe, type Profile } from "@/hooks/useProfile";
 import ShareWithFriends from "./ShareWithFriends";
