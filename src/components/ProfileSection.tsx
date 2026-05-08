@@ -90,11 +90,12 @@ const ProfileSection = () => {
 
       {/* Tab switcher */}
       <div className="flex justify-center">
-        <div className="inline-flex rounded-xl bg-secondary/50 p-1 gap-1">
+        <div className="inline-flex rounded-xl bg-secondary/50 p-1 gap-1 flex-wrap justify-center">
           {([
             { key: "profile", label: "👤 Me" },
             { key: "friends", label: "👥 Friends" },
             { key: "shared", label: "📬 Shared" },
+            { key: "settings", label: "⚙️ Settings" },
           ] as const).map((t) => (
             <button
               key={t.key}
@@ -115,6 +116,7 @@ const ProfileSection = () => {
         {tab === "profile" && <MyProfileTab key="profile" />}
         {tab === "friends" && <FriendsTab key="friends" />}
         {tab === "shared" && <SharedTab key="shared" />}
+        {tab === "settings" && <SettingsTab key="settings" />}
       </AnimatePresence>
     </motion.div>
   );
