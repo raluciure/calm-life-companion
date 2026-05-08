@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight, LogOut } from "lucide-react";
+import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight, LogOut, Settings, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useFeatures, type FeatureKey } from "@/hooks/useFeatures";
+import { Switch } from "@/components/ui/switch";
 import {
   useMyProfile,
   useUpdateProfile,
