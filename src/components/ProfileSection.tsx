@@ -461,4 +461,67 @@ const SharedTab = () => {
   );
 };
 
+// ---- Settings Tab ----
+const SettingsTab = () => {
+  const { features, toggle } = useFeatures();
+
+  const groups: { title: string; items: { key: FeatureKey; emoji: string; label: string; desc: string }[] }[] = [
+    {
+      title: "Daily Life sections",
+      items: [
+        { key: "schedule", emoji: "📅", label: "Schedule", desc: "Plan your day" },
+        { key: "health", emoji: "🫶", label: "Health", desc: "Meds & period tracking" },
+        { key: "gym", emoji: "🏋️", label: "Gym", desc: "Track workouts" },
+        { key: "meals", emoji: "🍽️", label: "Meals", desc: "Nutrition & groceries" },
+      ],
+    },
+    {
+      title: "Health details",
+      items: [
+        { key: "meds", emoji: "💊", label: "Medications", desc: "Daily medication checklist" },
+        { key: "period", emoji: "🌸", label: "Period", desc: "Cycle & symptoms" },
+      ],
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="space-y-5"
+    >
+      <p className="text-xs font-body text-muted-foreground text-center px-2">
+        Choose which parts of your daily life you want to use. You can change these any time. ✨
+      </p>
+
+      {groups.map((g) => (
+        <div key={g.title} className="space-y-2">
+          <p className="text-xs font-body text-muted-foreground px-1">{g.title}</p>
+          <div className="space-y-1.5">
+            {g.items.map((it) => (
+              <div
+                key={it.key}
+                className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-lg">{it.emoji}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-body text-foreground">{it.label}</p>
+                    <p className="text-[11px] font-body text-muted-foreground truncate">{it.desc}</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={!!features[it.key]}
+                  onCheckedChange={(v) => toggle(it.key, v)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </motion.div>
+  );
+};
+
 export default ProfileSection;
