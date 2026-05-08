@@ -50,6 +50,25 @@ const HomeFeed = () => {
   const doneCount = todayItems.filter((i) => i.done).length;
   const totalCount = todayItems.length;
 
+  // Red-dot tracking: items newer than last-seen timestamp are "new"
+  const LAST_SEEN_KEY = "shared_items_last_seen";
+  const [lastSeen, setLastSeen] = useState<number>(() => {
+    const v = typeof window !== "undefined" ? localStorage.getItem(LAST_SEEN_KEY) : null;
+    return v ? parseInt(v, 10) : 0;
+  });
+  const newCount = sharedItems.filter((s) => new Date(s.created_at).getTime() > lastSeen).length;
+
+  // Mark as seen 1.5s after the section is on screen with new items
+  useEffect(() => {
+    if (newCount === 0 || sharedItems.length === 0) return;
+    const latest = Math.max(...sharedItems.map((s) => new Date(s.created_at).getTime()));
+    const t = setTimeout(() => {
+      localStorage.setItem(LAST_SEEN_KEY, String(latest));
+      setLastSeen(latest);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [newCount, sharedItems]);
+
   const typeLabels: Record<string, { emoji: string; label: string }> = {
     workout: { emoji: "💪", label: "Workout" },
     meal: { emoji: "🍽️", label: "Meal" },
