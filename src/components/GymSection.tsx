@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Clock, ChevronDown, ChevronUp, Pencil, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { useWorkouts, useAddWorkout, useUpdateWorkout, useDeleteWorkout, type Exercise, type Workout } from "@/hooks/useWorkouts";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, isWithinInterval, parseISO } from "date-fns";
 import ShareWithFriends from "./ShareWithFriends";
