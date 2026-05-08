@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight, LogOut } from "lucide-react";
+import { UserPlus, Users, Search, Check, X, Trash2, Send, Pencil, Dumbbell, UtensilsCrossed, CalendarDays, Share2, ChevronRight, LogOut, Settings, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useFeatures, type FeatureKey } from "@/hooks/useFeatures";
+import { Switch } from "@/components/ui/switch";
 import {
   useMyProfile,
   useUpdateProfile,
@@ -21,7 +23,7 @@ import {
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
 
-type ProfileTab = "profile" | "friends" | "shared";
+type ProfileTab = "profile" | "friends" | "shared" | "settings";
 
 const ProfileSection = () => {
   const [tab, setTab] = useState<ProfileTab>("profile");
@@ -88,11 +90,12 @@ const ProfileSection = () => {
 
       {/* Tab switcher */}
       <div className="flex justify-center">
-        <div className="inline-flex rounded-xl bg-secondary/50 p-1 gap-1">
+        <div className="inline-flex rounded-xl bg-secondary/50 p-1 gap-1 flex-wrap justify-center">
           {([
             { key: "profile", label: "👤 Me" },
             { key: "friends", label: "👥 Friends" },
             { key: "shared", label: "📬 Shared" },
+            { key: "settings", label: "⚙️ Settings" },
           ] as const).map((t) => (
             <button
               key={t.key}
@@ -113,6 +116,7 @@ const ProfileSection = () => {
         {tab === "profile" && <MyProfileTab key="profile" />}
         {tab === "friends" && <FriendsTab key="friends" />}
         {tab === "shared" && <SharedTab key="shared" />}
+        {tab === "settings" && <SettingsTab key="settings" />}
       </AnimatePresence>
     </motion.div>
   );
@@ -453,6 +457,69 @@ const SharedTab = () => {
           );
         })
       )}
+    </motion.div>
+  );
+};
+
+// ---- Settings Tab ----
+const SettingsTab = () => {
+  const { features, toggle } = useFeatures();
+
+  const groups: { title: string; items: { key: FeatureKey; emoji: string; label: string; desc: string }[] }[] = [
+    {
+      title: "Daily Life sections",
+      items: [
+        { key: "schedule", emoji: "📅", label: "Schedule", desc: "Plan your day" },
+        { key: "health", emoji: "🫶", label: "Health", desc: "Meds & period tracking" },
+        { key: "gym", emoji: "🏋️", label: "Gym", desc: "Track workouts" },
+        { key: "meals", emoji: "🍽️", label: "Meals", desc: "Nutrition & groceries" },
+      ],
+    },
+    {
+      title: "Health details",
+      items: [
+        { key: "meds", emoji: "💊", label: "Medications", desc: "Daily medication checklist" },
+        { key: "period", emoji: "🌸", label: "Period", desc: "Cycle & symptoms" },
+      ],
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="space-y-5"
+    >
+      <p className="text-xs font-body text-muted-foreground text-center px-2">
+        Choose which parts of your daily life you want to use. You can change these any time. ✨
+      </p>
+
+      {groups.map((g) => (
+        <div key={g.title} className="space-y-2">
+          <p className="text-xs font-body text-muted-foreground px-1">{g.title}</p>
+          <div className="space-y-1.5">
+            {g.items.map((it) => (
+              <div
+                key={it.key}
+                className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-lg">{it.emoji}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-body text-foreground">{it.label}</p>
+                    <p className="text-[11px] font-body text-muted-foreground truncate">{it.desc}</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={!!features[it.key]}
+                  onCheckedChange={(v) => toggle(it.key, v)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </motion.div>
   );
 };

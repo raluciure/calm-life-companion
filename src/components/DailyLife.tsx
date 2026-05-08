@@ -14,10 +14,11 @@ import FreeTimeMessage from "./FreeTimeMessage";
 import WeeklyView from "./WeeklyView";
 import MonthlyView from "./MonthlyView";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
+import { useFeatures } from "@/hooks/useFeatures";
 
 type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
 
-const sections: { key: DailyLifeSection; icon: typeof CalendarDays; label: string; emoji: string; desc: string }[] = [
+const allSections: { key: DailyLifeSection; icon: typeof CalendarDays; label: string; emoji: string; desc: string }[] = [
   { key: "schedule", icon: CalendarDays, label: "Schedule", emoji: "📅", desc: "Plan your day" },
   { key: "health", icon: Heart, label: "Health", emoji: "🫶", desc: "Meds & period" },
   { key: "gym", icon: Dumbbell, label: "Gym", emoji: "🏋️", desc: "Track workouts" },
@@ -28,6 +29,8 @@ const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
 const DailyLife = () => {
   const [activeSection, setActiveSection] = useState<DailyLifeSection | null>(null);
+  const { features } = useFeatures();
+  const sections = allSections.filter((s) => features[s.key]);
 
   if (activeSection) {
     return (
