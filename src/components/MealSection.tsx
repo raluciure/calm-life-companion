@@ -717,7 +717,7 @@ const MealSection = () => {
             )}
 
             {/* Share grocery list */}
-            {groceryItems.length > 0 && friendUserIds.length > 0 && (
+            {!isViewingShared && groceryItems.length > 0 && friendUserIds.length > 0 && myUserId && (
               <div className="space-y-2">
                 <button
                   onClick={() => setShowShareGrocery(!showShareGrocery)}
