@@ -765,7 +765,7 @@ const MealSection = () => {
             )}
 
             {/* No friends hint */}
-            {groceryItems.length > 0 && friendUserIds.length === 0 && (
+            {!isViewingShared && groceryItems.length > 0 && friendUserIds.length === 0 && (
               <p className="text-center text-[11px] font-body text-muted-foreground/50 py-2">
                 Add friends in Profile to share your grocery list 👥
               </p>
