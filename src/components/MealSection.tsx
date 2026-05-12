@@ -24,6 +24,7 @@ import {
   useToggleGroceryItem,
   useDeleteGroceryItem,
   useClearCheckedGroceryItems,
+  useRealtimeGroceryList,
   GROCERY_CATEGORIES,
   CATEGORY_EMOJIS,
 } from "@/hooks/useGroceryList";
