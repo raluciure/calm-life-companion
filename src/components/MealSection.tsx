@@ -772,7 +772,7 @@ const MealSection = () => {
               </p>
             )}
             </>
-            )}
+
           </div>
         </>
       )}
