@@ -27,6 +27,7 @@ const HomeFeed = () => {
   const { data: friends = [] } = useFriends();
 
   const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [openItem, setOpenItem] = useState<{ type: string; id: string; sender?: string } | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setMyUserId(user?.id || null));
   }, []);
