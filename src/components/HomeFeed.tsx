@@ -13,6 +13,8 @@ import { useItems } from "@/hooks/useItems";
 import { useMealsByDate } from "@/hooks/useMeals";
 import { supabase } from "@/integrations/supabase/client";
 import Greeting from "./Greeting";
+import SharedItemDialog from "./SharedItemDialog";
+import { openSharedGrocery } from "@/lib/sharedNav";
 
 const toDateStr = (d: Date) => format(d, "yyyy-MM-dd");
 
