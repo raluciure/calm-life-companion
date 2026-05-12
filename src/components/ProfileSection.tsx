@@ -385,6 +385,7 @@ const FriendsTab = () => {
 // ---- Shared Tab ----
 const SharedTab = () => {
   const { data: sharedItems = [] } = useSharedWithMe();
+  const [openItem, setOpenItem] = useState<{ type: string; id: string; sender?: string } | null>(null);
 
   const allUserIds = useMemo(() => {
     return [...new Set(sharedItems.map((s) => s.from_user_id))];
@@ -419,10 +420,20 @@ const SharedTab = () => {
           const sender = profileMap[item.from_user_id];
           const t = typeLabels[item.item_type] || { emoji: "📎", label: item.item_type };
           const isGrocery = item.item_type === "grocery_list";
-          const groceryItemsList = isGrocery && item.message ? item.message.split(", ").filter(Boolean) : [];
+          const handleOpen = () => {
+            if (isGrocery) {
+              openSharedGrocery(item.id);
+            } else {
+              setOpenItem({ type: item.item_type, id: item.item_id, sender: sender?.display_name });
+            }
+          };
 
           return (
-            <div key={item.id} className="p-3 rounded-xl bg-secondary/30 space-y-2">
+            <button
+              key={item.id}
+              onClick={handleOpen}
+              className="w-full text-left p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors space-y-2"
+            >
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-sm">
                   {sender?.display_name?.[0]?.toUpperCase() || "?"}
@@ -435,29 +446,24 @@ const SharedTab = () => {
                     shared a {t.label.toLowerCase()} {t.emoji}
                   </span>
                 </div>
-                <span className="text-[10px] font-body text-muted-foreground/50">
-                  {new Date(item.created_at).toLocaleDateString()}
-                </span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
               </div>
-
-              {/* Grocery list items rendered as a checklist */}
-              {isGrocery && groceryItemsList.length > 0 ? (
-                <div className="pl-2 space-y-1">
-                  {groceryItemsList.map((name, idx) => (
-                    <div key={idx} className="flex items-center gap-2 py-0.5">
-                      <div className="w-4 h-4 rounded border border-border/50 flex items-center justify-center">
-                        <span className="text-[8px] text-muted-foreground/50">•</span>
-                      </div>
-                      <span className="text-sm font-body text-foreground">{name}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : item.message ? (
+              {!isGrocery && item.message && (
                 <p className="text-sm font-body text-foreground pl-9">"{item.message}"</p>
-              ) : null}
-            </div>
+              )}
+            </button>
           );
         })
+      )}
+
+      {openItem && (
+        <SharedItemDialog
+          open={!!openItem}
+          onOpenChange={(o) => !o && setOpenItem(null)}
+          itemType={openItem.type as any}
+          itemId={openItem.id}
+          senderName={openItem.sender}
+        />
       )}
     </motion.div>
   );
