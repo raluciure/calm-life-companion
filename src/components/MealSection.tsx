@@ -42,11 +42,9 @@ const MealSection = () => {
   const { data: dayMeals = [] } = useMealsByDate(dateStr);
   const { data: weekMeals = [] } = useMealsByWeek(selectedDate);
   const addMeal = useAddMeal();
-  const { data: groceryItems = [] } = useGroceryItems();
-  const addGroceryItem = useAddGroceryItem();
+  // selectedListOwnerId is set further below; hooks read it via closure
   const toggleGroceryItem = useToggleGroceryItem();
   const deleteGroceryItem = useDeleteGroceryItem();
-  const clearChecked = useClearCheckedGroceryItems();
   const [groceryName, setGroceryName] = useState("");
   const [groceryCategory, setGroceryCategory] = useState("other");
   const [showShareGrocery, setShowShareGrocery] = useState(false);
