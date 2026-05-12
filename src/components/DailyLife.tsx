@@ -33,6 +33,12 @@ const DailyLife = () => {
   const { features } = useFeatures();
   const sections = allSections.filter((s) => features[s.key]);
 
+  useEffect(() => {
+    const pending = typeof window !== "undefined" ? sessionStorage.getItem(PENDING_KEY) : null;
+    if (pending) setActiveSection("meals");
+    return onOpenSharedGrocery(() => setActiveSection("meals"));
+  }, []);
+
   if (activeSection) {
     return (
       <motion.div
