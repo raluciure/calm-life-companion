@@ -694,7 +694,7 @@ const MealSection = () => {
             )}
 
             {/* Shared grocery indicators */}
-            {groceryShares.length > 0 && (
+            {!isViewingShared && groceryShares.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-xs font-body font-medium text-muted-foreground flex items-center gap-1">
                   <Share2 className="w-3 h-3" /> Shared with
