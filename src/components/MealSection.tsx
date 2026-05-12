@@ -566,41 +566,19 @@ const MealSection = () => {
               </div>
             )}
 
-            {selectedListId !== "mine" && selectedSharedList ? (
-              <div className="space-y-2">
-                <p className="text-xs font-body text-muted-foreground">
-                  Shared by {sharedRecipientMap[selectedSharedList.from_user_id]?.display_name || "a friend"} · {new Date(selectedSharedList.created_at).toLocaleDateString()}
+            {isViewingShared && selectedSharedList && (
+              <div className="px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-xs font-body text-foreground">
+                  📬 Shared by {sharedRecipientMap[selectedSharedList.from_user_id]?.display_name || "a friend"}
                 </p>
-                {sharedListItems.length === 0 ? (
-                  <p className="text-center text-sm font-body text-muted-foreground/50 py-6">This list is empty</p>
-                ) : (
-                  <div className="space-y-1">
-                    {sharedListItems.map((name, idx) => {
-                      const isChecked = checkedSharedItems[selectedSharedList.id]?.has(name);
-                      return (
-                        <div
-                          key={`${name}-${idx}`}
-                          className={`flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2.5 transition-colors ${isChecked ? "opacity-50" : ""}`}
-                        >
-                          <button
-                            onClick={() => toggleSharedItem(selectedSharedList.id, name)}
-                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                              isChecked ? "bg-primary border-primary" : "border-border/50 hover:border-primary/50"
-                            }`}
-                          >
-                            {isChecked && <Check className="w-3 h-3 text-primary-foreground" />}
-                          </button>
-                          <span className={`flex-1 text-sm font-body ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                            {name}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <p className="text-[10px] font-body text-muted-foreground mt-0.5">
+                  Changes you make sync live with everyone on this list.
+                </p>
               </div>
-            ) : (
+            )}
+
             <>
+
             {/* Add item form */}
             <div className="flex gap-2">
               <input
