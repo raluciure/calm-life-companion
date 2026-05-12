@@ -741,7 +741,7 @@ const MealSection = () => {
                             key={fid}
                             onClick={() => {
                               shareItem.mutate(
-                                { to_user_id: fid, item_type: "grocery_list", item_id: myUserId!, message: null },
+                                { to_user_id: fid, item_type: "grocery_list", item_id: myUserId! },
                                 {
                                   onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); },
                                   onError: (err: any) => toast.error(err?.message || "Couldn't share — try again"),
