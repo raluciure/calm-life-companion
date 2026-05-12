@@ -90,6 +90,17 @@ const MealSection = () => {
 
   // Selected grocery list view: "mine" or shared item id
   const [selectedListId, setSelectedListId] = useState<string>("mine");
+
+  // If user navigated here from a shared grocery item click, jump to that list
+  useEffect(() => {
+    const pending = typeof window !== "undefined" ? sessionStorage.getItem("pending_shared_grocery_id") : null;
+    if (!pending) return;
+    if (sharedGroceriesWithMe.some((s) => s.id === pending)) {
+      setView("grocery");
+      setSelectedListId(pending);
+      try { sessionStorage.removeItem("pending_shared_grocery_id"); } catch {}
+    }
+  }, [sharedGroceriesWithMe]);
   const selectedSharedList = useMemo(
     () => sharedGroceriesWithMe.find(s => s.id === selectedListId),
     [selectedListId, sharedGroceriesWithMe]

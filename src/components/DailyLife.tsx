@@ -15,6 +15,7 @@ import WeeklyView from "./WeeklyView";
 import MonthlyView from "./MonthlyView";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { useFeatures } from "@/hooks/useFeatures";
+import { onOpenSharedGrocery, PENDING_KEY } from "@/lib/sharedNav";
 
 type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
 
@@ -31,6 +32,12 @@ const DailyLife = () => {
   const [activeSection, setActiveSection] = useState<DailyLifeSection | null>(null);
   const { features } = useFeatures();
   const sections = allSections.filter((s) => features[s.key]);
+
+  useEffect(() => {
+    const pending = typeof window !== "undefined" ? sessionStorage.getItem(PENDING_KEY) : null;
+    if (pending) setActiveSection("meals");
+    return onOpenSharedGrocery(() => setActiveSection("meals"));
+  }, []);
 
   if (activeSection) {
     return (

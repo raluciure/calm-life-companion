@@ -10,8 +10,14 @@ import { Home, Leaf, User } from "lucide-react";
 
 type AppSection = "home" | "daily" | "profile";
 
+import { onOpenSharedGrocery } from "@/lib/sharedNav";
+
 const MainApp = () => {
   const [section, setSection] = useState<AppSection>("home");
+
+  useEffect(() => {
+    return onOpenSharedGrocery(() => setSection("daily"));
+  }, []);
 
   return (
     <div className="min-h-[100svh] bg-background">
