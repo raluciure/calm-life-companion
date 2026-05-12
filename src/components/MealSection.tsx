@@ -24,6 +24,7 @@ import {
   useToggleGroceryItem,
   useDeleteGroceryItem,
   useClearCheckedGroceryItems,
+  useRealtimeGroceryList,
   GROCERY_CATEGORIES,
   CATEGORY_EMOJIS,
 } from "@/hooks/useGroceryList";
@@ -42,11 +43,9 @@ const MealSection = () => {
   const { data: dayMeals = [] } = useMealsByDate(dateStr);
   const { data: weekMeals = [] } = useMealsByWeek(selectedDate);
   const addMeal = useAddMeal();
-  const { data: groceryItems = [] } = useGroceryItems();
-  const addGroceryItem = useAddGroceryItem();
+  // selectedListOwnerId is set further below; hooks read it via closure
   const toggleGroceryItem = useToggleGroceryItem();
   const deleteGroceryItem = useDeleteGroceryItem();
-  const clearChecked = useClearCheckedGroceryItems();
   const [groceryName, setGroceryName] = useState("");
   const [groceryCategory, setGroceryCategory] = useState("other");
   const [showShareGrocery, setShowShareGrocery] = useState(false);
@@ -95,20 +94,14 @@ const MealSection = () => {
     () => sharedGroceriesWithMe.find(s => s.id === selectedListId),
     [selectedListId, sharedGroceriesWithMe]
   );
-  const sharedListItems = useMemo(() => {
-    if (!selectedSharedList?.message) return [] as string[];
-    return selectedSharedList.message.split(",").map(s => s.trim()).filter(Boolean);
-  }, [selectedSharedList]);
-  const [checkedSharedItems, setCheckedSharedItems] = useState<Record<string, Set<string>>>({});
-  const toggleSharedItem = (listId: string, name: string) => {
-    setCheckedSharedItems(prev => {
-      const next = { ...prev };
-      const set = new Set(next[listId] || []);
-      if (set.has(name)) set.delete(name); else set.add(name);
-      next[listId] = set;
-      return next;
-    });
-  };
+  const selectedListOwnerId = selectedSharedList?.from_user_id || myUserId || undefined;
+  const isViewingShared = selectedListId !== "mine" && !!selectedSharedList;
+
+  // Live grocery items for whichever list is selected
+  const { data: groceryItems = [] } = useGroceryItems(selectedListOwnerId);
+  const addGroceryItem = useAddGroceryItem(selectedListOwnerId);
+  const clearChecked = useClearCheckedGroceryItems(selectedListOwnerId);
+  useRealtimeGroceryList(selectedListOwnerId);
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
@@ -573,41 +566,19 @@ const MealSection = () => {
               </div>
             )}
 
-            {selectedListId !== "mine" && selectedSharedList ? (
-              <div className="space-y-2">
-                <p className="text-xs font-body text-muted-foreground">
-                  Shared by {sharedRecipientMap[selectedSharedList.from_user_id]?.display_name || "a friend"} · {new Date(selectedSharedList.created_at).toLocaleDateString()}
+            {isViewingShared && selectedSharedList && (
+              <div className="px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-xs font-body text-foreground">
+                  📬 Shared by {sharedRecipientMap[selectedSharedList.from_user_id]?.display_name || "a friend"}
                 </p>
-                {sharedListItems.length === 0 ? (
-                  <p className="text-center text-sm font-body text-muted-foreground/50 py-6">This list is empty</p>
-                ) : (
-                  <div className="space-y-1">
-                    {sharedListItems.map((name, idx) => {
-                      const isChecked = checkedSharedItems[selectedSharedList.id]?.has(name);
-                      return (
-                        <div
-                          key={`${name}-${idx}`}
-                          className={`flex items-center gap-2 bg-secondary/30 rounded-xl px-3 py-2.5 transition-colors ${isChecked ? "opacity-50" : ""}`}
-                        >
-                          <button
-                            onClick={() => toggleSharedItem(selectedSharedList.id, name)}
-                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                              isChecked ? "bg-primary border-primary" : "border-border/50 hover:border-primary/50"
-                            }`}
-                          >
-                            {isChecked && <Check className="w-3 h-3 text-primary-foreground" />}
-                          </button>
-                          <span className={`flex-1 text-sm font-body ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                            {name}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <p className="text-[10px] font-body text-muted-foreground mt-0.5">
+                  Changes you make sync live with everyone on this list.
+                </p>
               </div>
-            ) : (
+            )}
+
             <>
+
             {/* Add item form */}
             <div className="flex gap-2">
               <input
@@ -723,7 +694,7 @@ const MealSection = () => {
             )}
 
             {/* Shared grocery indicators */}
-            {groceryShares.length > 0 && (
+            {!isViewingShared && groceryShares.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-xs font-body font-medium text-muted-foreground flex items-center gap-1">
                   <Share2 className="w-3 h-3" /> Shared with
@@ -746,7 +717,7 @@ const MealSection = () => {
             )}
 
             {/* Share grocery list */}
-            {groceryItems.length > 0 && friendUserIds.length > 0 && (
+            {!isViewingShared && groceryItems.length > 0 && friendUserIds.length > 0 && myUserId && (
               <div className="space-y-2">
                 <button
                   onClick={() => setShowShareGrocery(!showShareGrocery)}
@@ -769,9 +740,8 @@ const MealSection = () => {
                           <button
                             key={fid}
                             onClick={() => {
-                              const itemNames = groceryItems.filter(i => !i.checked).map(i => i.name).join(", ");
                               shareItem.mutate(
-                                { to_user_id: fid, item_type: "grocery_list", item_id: crypto.randomUUID(), message: itemNames },
+                                { to_user_id: fid, item_type: "grocery_list", item_id: myUserId! },
                                 {
                                   onSuccess: () => { toast.success(`Shared with ${p?.display_name || "friend"}!`); setShowShareGrocery(false); },
                                   onError: (err: any) => toast.error(err?.message || "Couldn't share — try again"),
@@ -795,13 +765,13 @@ const MealSection = () => {
             )}
 
             {/* No friends hint */}
-            {groceryItems.length > 0 && friendUserIds.length === 0 && (
+            {!isViewingShared && groceryItems.length > 0 && friendUserIds.length === 0 && (
               <p className="text-center text-[11px] font-body text-muted-foreground/50 py-2">
                 Add friends in Profile to share your grocery list 👥
               </p>
             )}
             </>
-            )}
+
           </div>
         </>
       )}

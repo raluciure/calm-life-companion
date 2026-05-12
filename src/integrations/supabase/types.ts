@@ -44,6 +44,7 @@ export type Database = {
           checked: boolean
           created_at: string
           id: string
+          list_owner_id: string
           name: string
           user_id: string
         }
@@ -52,6 +53,7 @@ export type Database = {
           checked?: boolean
           created_at?: string
           id?: string
+          list_owner_id: string
           name: string
           user_id: string
         }
@@ -60,6 +62,7 @@ export type Database = {
           checked?: boolean
           created_at?: string
           id?: string
+          list_owner_id?: string
           name?: string
           user_id?: string
         }
