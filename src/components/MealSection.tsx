@@ -93,20 +93,14 @@ const MealSection = () => {
     () => sharedGroceriesWithMe.find(s => s.id === selectedListId),
     [selectedListId, sharedGroceriesWithMe]
   );
-  const sharedListItems = useMemo(() => {
-    if (!selectedSharedList?.message) return [] as string[];
-    return selectedSharedList.message.split(",").map(s => s.trim()).filter(Boolean);
-  }, [selectedSharedList]);
-  const [checkedSharedItems, setCheckedSharedItems] = useState<Record<string, Set<string>>>({});
-  const toggleSharedItem = (listId: string, name: string) => {
-    setCheckedSharedItems(prev => {
-      const next = { ...prev };
-      const set = new Set(next[listId] || []);
-      if (set.has(name)) set.delete(name); else set.add(name);
-      next[listId] = set;
-      return next;
-    });
-  };
+  const selectedListOwnerId = selectedSharedList?.from_user_id || myUserId || undefined;
+  const isViewingShared = selectedListId !== "mine" && !!selectedSharedList;
+
+  // Live grocery items for whichever list is selected
+  const { data: groceryItems = [] } = useGroceryItems(selectedListOwnerId);
+  const addGroceryItem = useAddGroceryItem(selectedListOwnerId);
+  const clearChecked = useClearCheckedGroceryItems(selectedListOwnerId);
+  useRealtimeGroceryList(selectedListOwnerId);
 
   // Form state
   const [formType, setFormType] = useState<MealType>("lunch");
