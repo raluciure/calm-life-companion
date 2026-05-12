@@ -22,6 +22,8 @@ import {
   type Profile,
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
+import SharedItemDialog from "./SharedItemDialog";
+import { openSharedGrocery } from "@/lib/sharedNav";
 
 type ProfileTab = "profile" | "friends" | "shared" | "settings";
 
