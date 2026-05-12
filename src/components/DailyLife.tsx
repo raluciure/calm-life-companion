@@ -15,6 +15,7 @@ import WeeklyView from "./WeeklyView";
 import MonthlyView from "./MonthlyView";
 import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } from "@/hooks/useItems";
 import { useFeatures } from "@/hooks/useFeatures";
+import { onOpenSharedGrocery, PENDING_KEY } from "@/lib/sharedNav";
 
 type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
 
