@@ -129,8 +129,19 @@ const HomeFeed = () => {
               const sender = profileMap[item.from_user_id];
               const t = typeLabels[item.item_type] || { emoji: "📎", label: item.item_type };
               const isNew = new Date(item.created_at).getTime() > lastSeen;
+              const handleOpen = () => {
+                if (item.item_type === "grocery_list") {
+                  openSharedGrocery(item.id);
+                } else {
+                  setOpenItem({ type: item.item_type, id: item.item_id, sender: sender?.display_name });
+                }
+              };
               return (
-                <div key={item.id} className="relative p-3 rounded-xl bg-secondary/30 space-y-1">
+                <button
+                  key={item.id}
+                  onClick={handleOpen}
+                  className="w-full text-left relative p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors space-y-1"
+                >
                   {isNew && (
                     <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-destructive" />
                   )}
@@ -155,12 +166,22 @@ const HomeFeed = () => {
                       {item.message.length > 80 ? item.message.slice(0, 80) + "…" : item.message}
                     </p>
                   )}
-                </div>
+                </button>
               );
             })}
           </div>
         )}
       </div>
+
+      {openItem && (
+        <SharedItemDialog
+          open={!!openItem}
+          onOpenChange={(o) => !o && setOpenItem(null)}
+          itemType={openItem.type as any}
+          itemId={openItem.id}
+          senderName={openItem.sender}
+        />
+      )}
     </motion.div>
   );
 };
