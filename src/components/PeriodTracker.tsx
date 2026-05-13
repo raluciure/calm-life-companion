@@ -58,10 +58,10 @@ const DayButton = ({
       disabled={!inMonth}
       aria-pressed={isPeriod}
       aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
-      className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation
-        ${!inMonth ? "cursor-default opacity-20" : "cursor-pointer hover:bg-secondary/60"}
+      className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation border-2
+        ${!inMonth ? "cursor-default opacity-20 border-transparent" : "cursor-pointer hover:bg-secondary/60 border-transparent"}
         ${today ? "ring-1 ring-primary/30" : ""}
-        ${isSelected ? "ring-2 ring-primary" : ""}
+        ${isSelected ? "border-primary ring-2 ring-primary" : "border-transparent"}
         ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
       `}
     >
