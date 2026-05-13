@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { usePeriodLogs, useTogglePeriodDay, usePeriodSymptoms, useToggleSymptom } from "@/hooks/useHealth";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 
 const SYMPTOMS = [
   { key: "cramps", emoji: "😣", label: "Cramps" },
