@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Heart, Dumbbell, UtensilsCrossed, ArrowLeft } from "lucide-react";
+import { CalendarDays, Heart, Dumbbell, UtensilsCrossed, ArrowLeft, ListChecks } from "lucide-react";
 import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays } from "date-fns";
 import HealthSection from "./HealthSection";
 import GymSection from "./GymSection";
 import MealSection from "./MealSection";
+import TodosSection from "./TodosSection";
 import ViewSwitcher, { type ViewMode } from "./ViewSwitcher";
 import DateNavigator from "./DateNavigator";
 import TimelineItem, { type TimelineItemData } from "./TimelineItem";
