@@ -18,10 +18,11 @@ import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } 
 import { useFeatures } from "@/hooks/useFeatures";
 import { onOpenSharedGrocery, PENDING_KEY } from "@/lib/sharedNav";
 
-type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
+type DailyLifeSection = "schedule" | "todos" | "health" | "gym" | "meals";
 
 const allSections: { key: DailyLifeSection; icon: typeof CalendarDays; label: string; emoji: string; desc: string }[] = [
   { key: "schedule", icon: CalendarDays, label: "Schedule", emoji: "📅", desc: "Plan your day" },
+  { key: "todos", icon: ListChecks, label: "To-do", emoji: "✅", desc: "Things to remember" },
   { key: "health", icon: Heart, label: "Health", emoji: "🫶", desc: "Meds & period" },
   { key: "gym", icon: Dumbbell, label: "Gym", emoji: "🏋️", desc: "Track workouts" },
   { key: "meals", icon: UtensilsCrossed, label: "Meals", emoji: "🍽️", desc: "Nutrition & groceries" },
