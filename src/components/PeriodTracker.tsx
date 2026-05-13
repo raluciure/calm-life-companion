@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { usePeriodLogs, useTogglePeriodDay, usePeriodSymptoms, useToggleSymptom } from "@/hooks/useHealth";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 
 const SYMPTOMS = [
   { key: "cramps", emoji: "😣", label: "Cramps" },
@@ -57,10 +58,10 @@ const DayButton = ({
       disabled={!inMonth}
       aria-pressed={isPeriod}
       aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
-      className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation
-        ${!inMonth ? "cursor-default opacity-20" : "cursor-pointer hover:bg-secondary/60"}
+      className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation border-2
+        ${!inMonth ? "cursor-default opacity-20 border-transparent" : "cursor-pointer hover:bg-secondary/60 border-transparent"}
         ${today ? "ring-1 ring-primary/30" : ""}
-        ${isSelected ? "ring-2 ring-primary" : ""}
+        ${isSelected ? "border-primary ring-2 ring-primary" : "border-transparent"}
         ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
       `}
     >
@@ -221,27 +222,23 @@ const PeriodTracker = () => {
         </p>
       </div>
 
-      <AnimatePresence>
-        {selectedDate && isSymptomsOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5"
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-sm font-display font-medium text-foreground">
-                {selectedDateLabel} — Symptoms
-              </h4>
+      <Drawer open={isSymptomsOpen} onOpenChange={setIsSymptomsOpen}>
+        <DrawerContent className="rounded-t-[20px] border-t border-border bg-card pb-6">
+          <DrawerHeader className="relative pb-2">
+            <DrawerTitle className="text-base font-display font-medium text-foreground">
+              {selectedDateLabel} — Symptoms
+            </DrawerTitle>
+            <DrawerClose asChild>
               <button
                 type="button"
-                onClick={() => setIsSymptomsOpen(false)}
-                className="text-[10px] font-body text-muted-foreground transition-colors hover:text-foreground"
+                className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground"
               >
-                Close
+                <X className="h-4 w-4" />
               </button>
-            </div>
+            </DrawerClose>
+          </DrawerHeader>
 
+          <div className="px-4 pt-2">
             <div className="flex flex-wrap gap-2">
               {SYMPTOMS.map((symptom) => {
                 const active = selectedSymptoms.has(symptom.key);
@@ -250,7 +247,7 @@ const PeriodTracker = () => {
                   <button
                     key={symptom.key}
                     type="button"
-                    onClick={() => toggleSymptom.mutate({ date: selectedDate, symptom: symptom.key })}
+                    onClick={() => toggleSymptom.mutate({ date: selectedDate!, symptom: symptom.key })}
                     className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-body transition-all
                       ${active
                         ? "bg-primary/15 text-primary ring-1 ring-primary/30 font-medium"
@@ -264,14 +261,14 @@ const PeriodTracker = () => {
               })}
             </div>
 
-            {periodDates.has(selectedDate) && (
-              <p className="mt-3 text-[10px] font-body italic text-period-active">
+            {selectedDate && periodDates.has(selectedDate) && (
+              <p className="mt-4 text-[10px] font-body italic text-period-active">
                 🌸 Period logged for this day
               </p>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </motion.div>
   );
 };
