@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Heart, Dumbbell, UtensilsCrossed, ArrowLeft } from "lucide-react";
+import { CalendarDays, Heart, Dumbbell, UtensilsCrossed, ArrowLeft, ListChecks } from "lucide-react";
 import { format, isToday, isThisWeek, isThisMonth, addWeeks, subWeeks, addMonths, subMonths, startOfWeek, addDays } from "date-fns";
 import HealthSection from "./HealthSection";
 import GymSection from "./GymSection";
 import MealSection from "./MealSection";
+import TodosSection from "./TodosSection";
 import ViewSwitcher, { type ViewMode } from "./ViewSwitcher";
 import DateNavigator from "./DateNavigator";
 import TimelineItem, { type TimelineItemData } from "./TimelineItem";
@@ -17,10 +18,11 @@ import { useItems, useTomorrowItems, useAddItem, useToggleItem, useDeleteItem } 
 import { useFeatures } from "@/hooks/useFeatures";
 import { onOpenSharedGrocery, PENDING_KEY } from "@/lib/sharedNav";
 
-type DailyLifeSection = "schedule" | "health" | "gym" | "meals";
+type DailyLifeSection = "schedule" | "todos" | "health" | "gym" | "meals";
 
 const allSections: { key: DailyLifeSection; icon: typeof CalendarDays; label: string; emoji: string; desc: string }[] = [
   { key: "schedule", icon: CalendarDays, label: "Schedule", emoji: "📅", desc: "Plan your day" },
+  { key: "todos", icon: ListChecks, label: "To-do", emoji: "✅", desc: "Things to remember" },
   { key: "health", icon: Heart, label: "Health", emoji: "🫶", desc: "Meds & period" },
   { key: "gym", icon: Dumbbell, label: "Gym", emoji: "🏋️", desc: "Track workouts" },
   { key: "meals", icon: UtensilsCrossed, label: "Meals", emoji: "🍽️", desc: "Nutrition & groceries" },
@@ -57,6 +59,7 @@ const DailyLife = () => {
         </button>
 
         {activeSection === "schedule" && <ScheduleContent />}
+        {activeSection === "todos" && <TodosSection />}
         {activeSection === "health" && <HealthSection />}
         {activeSection === "gym" && <GymSection />}
         {activeSection === "meals" && <MealSection />}

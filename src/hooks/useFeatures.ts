@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 
-export type FeatureKey = "schedule" | "health" | "meds" | "period" | "gym" | "meals";
+export type FeatureKey = "schedule" | "todos" | "health" | "meds" | "period" | "gym" | "meals";
 
 const STORAGE_KEY = "enabled_features_v1";
 
 const DEFAULTS: Record<FeatureKey, boolean> = {
   schedule: true,
+  todos: true,
   health: true,
   meds: true,
   period: true,

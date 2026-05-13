@@ -328,6 +328,30 @@ export type Database = {
         }
         Relationships: []
       }
+      todos: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workouts: {
         Row: {
           created_at: string

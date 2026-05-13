@@ -478,6 +478,7 @@ const SettingsTab = () => {
       title: "Daily Life sections",
       items: [
         { key: "schedule", emoji: "📅", label: "Schedule", desc: "Plan your day" },
+        { key: "todos", emoji: "✅", label: "To-do list", desc: "Quick checklist" },
         { key: "health", emoji: "🫶", label: "Health", desc: "Meds & period tracking" },
         { key: "gym", emoji: "🏋️", label: "Gym", desc: "Track workouts" },
         { key: "meals", emoji: "🍽️", label: "Meals", desc: "Nutrition & groceries" },
