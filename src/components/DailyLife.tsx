@@ -59,6 +59,7 @@ const DailyLife = () => {
         </button>
 
         {activeSection === "schedule" && <ScheduleContent />}
+        {activeSection === "todos" && <TodosSection />}
         {activeSection === "health" && <HealthSection />}
         {activeSection === "gym" && <GymSection />}
         {activeSection === "meals" && <MealSection />}
