@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import SharedItemDialog from "./SharedItemDialog";
+import FriendProfileDialog from "./FriendProfileDialog";
 import { openSharedGrocery } from "@/lib/sharedNav";
 
 type ProfileTab = "profile" | "friends" | "shared" | "settings";
@@ -185,6 +186,7 @@ const FriendsTab = () => {
   const respondToRequest = useRespondToRequest();
   const removeFriend = useRemoveFriend();
   const cancelRequest = useCancelFriendRequest();
+  const [openFriend, setOpenFriend] = useState<Profile | null>(null);
 
   // Get current user ID
   useEffect(() => {
@@ -359,16 +361,20 @@ const FriendsTab = () => {
             const friendId = myUserId && f.requester_id === myUserId ? f.addressee_id : f.requester_id;
             const p = profileMap[friendId];
             return (
-              <div key={f.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-body">
+              <div key={f.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <button
+                  onClick={() => p && setOpenFriend(p)}
+                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-body shrink-0">
                     {p?.display_name?.[0]?.toUpperCase() || "?"}
                   </div>
-                  <span className="text-sm font-body text-foreground">{p?.display_name || "User"}</span>
-                </div>
+                  <span className="text-sm font-body text-foreground truncate">{p?.display_name || "User"}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/40 ml-auto" />
+                </button>
                 <button
                   onClick={() => removeFriend.mutate(f.id, { onSuccess: () => toast.success("Friend removed") })}
-                  className="p-2 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  className="p-2 ml-1 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -377,6 +383,12 @@ const FriendsTab = () => {
           })
         )}
       </div>
+
+      <FriendProfileDialog
+        open={!!openFriend}
+        onOpenChange={(o) => !o && setOpenFriend(null)}
+        friend={openFriend}
+      />
     </motion.div>
   );
 };
