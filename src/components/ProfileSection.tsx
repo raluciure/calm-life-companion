@@ -186,6 +186,7 @@ const FriendsTab = () => {
   const respondToRequest = useRespondToRequest();
   const removeFriend = useRemoveFriend();
   const cancelRequest = useCancelFriendRequest();
+  const [openFriend, setOpenFriend] = useState<Profile | null>(null);
 
   // Get current user ID
   useEffect(() => {
