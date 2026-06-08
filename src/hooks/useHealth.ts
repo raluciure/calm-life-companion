@@ -40,6 +40,20 @@ export function usePeriodLogs(month: string) {
   });
 }
 
+export function useAllPeriodLogs() {
+  return useQuery({
+    queryKey: ["period-logs", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("period_logs")
+        .select("date")
+        .order("date", { ascending: true });
+      if (error) throw error;
+      return (data || []) as { date: string }[];
+    },
+  });
+}
+
 export function useTogglePeriodDay() {
   const qc = useQueryClient();
 
