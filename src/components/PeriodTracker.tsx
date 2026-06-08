@@ -251,6 +251,8 @@ const PeriodTracker = () => {
             const isPeriod = periodDates.has(dateStr);
             const hasSymptoms = symptomsByDate.has(dateStr);
             const isSelected = selectedDate === dateStr;
+            const isFertile = !isPeriod && fertileDates.has(dateStr);
+            const isOvulation = !isPeriod && ovulationDates.has(dateStr);
 
             return (
               <DayButton
@@ -259,6 +261,8 @@ const PeriodTracker = () => {
                 inMonth={inMonth}
                 today={today}
                 isPeriod={isPeriod}
+                isFertile={isFertile}
+                isOvulation={isOvulation}
                 hasSymptoms={hasSymptoms}
                 isSelected={isSelected}
                 onTap={() => handleSelectDate(dateStr)}
