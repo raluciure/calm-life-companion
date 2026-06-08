@@ -295,8 +295,23 @@ const PeriodTracker = () => {
           </div>
         </div>
 
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/50 pt-2 text-[10px] font-body text-muted-foreground/70">
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-period-active" /> Period
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-fertile-active" /> Fertile window
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="text-[10px] leading-none">🌼</span> Predicted ovulation
+          </span>
+          {allLogs.length > 0 && (
+            <span className="ml-auto italic">~{cycleLength}-day cycle</span>
+          )}
+        </div>
+
         <p className="mt-2 text-[10px] font-body italic text-muted-foreground/40">
-          Double-tap a day to log period · tap to select, then use + Symptoms
+          Double-tap a day to log period · tap to select, then use + Symptoms · fertile window is an approximation
         </p>
       </div>
 
