@@ -56,6 +56,11 @@
     --period-active: 350 55% 65%;
     --period-foreground: 350 50% 30%;
 
+    /* Fertile window / ovulation */
+    --fertile: 270 45% 90%;
+    --fertile-active: 280 50% 65%;
+    --fertile-foreground: 275 40% 30%;
+
     /* Fonts */
     --font-display: 'Source Serif 4', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
