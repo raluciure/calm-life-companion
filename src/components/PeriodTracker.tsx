@@ -94,11 +94,70 @@ const PeriodTracker = () => {
   const [isSymptomsOpen, setIsSymptomsOpen] = useState(false);
   const monthStr = format(viewDate, "yyyy-MM");
   const { data: logs = [] } = usePeriodLogs(monthStr);
+  const { data: allLogs = [] } = useAllPeriodLogs();
   const { data: symptoms = [] } = usePeriodSymptoms(monthStr);
   const toggleDay = useTogglePeriodDay();
   const toggleSymptom = useToggleSymptom();
 
   const periodDates = new Set(logs.map((log) => log.date));
+
+  // Compute fertile window + ovulation across the visible month using all logged cycles
+  const { fertileDates, ovulationDates, cycleLength } = useMemo(() => {
+    const allSet = new Set(allLogs.map((l) => l.date));
+    const sorted = [...allSet].sort();
+    // Cycle starts: a logged day whose previous day is not logged
+    const cycleStarts: Date[] = sorted
+      .filter((d) => {
+        const prev = format(addDays(parseISO(d), -1), "yyyy-MM-dd");
+        return !allSet.has(prev);
+      })
+      .map((d) => parseISO(d));
+
+    // Average cycle length from consecutive starts (clamp 21-40)
+    let cycleLen = 28;
+    if (cycleStarts.length >= 2) {
+      const gaps: number[] = [];
+      for (let i = 1; i < cycleStarts.length; i++) {
+        const g = differenceInCalendarDays(cycleStarts[i], cycleStarts[i - 1]);
+        if (g >= 21 && g <= 40) gaps.push(g);
+      }
+      if (gaps.length) cycleLen = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+    }
+
+    const fertile = new Set<string>();
+    const ovulation = new Set<string>();
+    if (cycleStarts.length === 0) {
+      return { fertileDates: fertile, ovulationDates: ovulation, cycleLength: cycleLen };
+    }
+
+    // Project cycle starts forward and backward to cover the visible month
+    const monthStart = startOfMonth(viewDate);
+    const monthEnd = addDays(startOfMonth(addMonths(viewDate, 1)), -1);
+    const lastStart = cycleStarts[cycleStarts.length - 1];
+
+    // Build all relevant cycle starts (logged + predicted) from earliest known up to monthEnd + cycleLen
+    const allStarts: Date[] = [...cycleStarts];
+    let next = addDays(lastStart, cycleLen);
+    while (next <= addDays(monthEnd, cycleLen)) {
+      allStarts.push(next);
+      next = addDays(next, cycleLen);
+    }
+
+    for (const start of allStarts) {
+      const ov = addDays(start, -14);
+      // Fertile window: ovulation - 3 to ovulation + 1 (5 days)
+      for (let offset = -3; offset <= 1; offset++) {
+        const d = addDays(ov, offset);
+        if (d >= addDays(monthStart, -7) && d <= addDays(monthEnd, 7)) {
+          fertile.add(format(d, "yyyy-MM-dd"));
+        }
+      }
+      ovulation.add(format(ov, "yyyy-MM-dd"));
+    }
+
+    return { fertileDates: fertile, ovulationDates: ovulation, cycleLength: cycleLen };
+  }, [allLogs, viewDate]);
+
 
   const monthStart = startOfMonth(viewDate);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
