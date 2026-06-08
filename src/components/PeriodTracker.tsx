@@ -23,6 +23,8 @@ const DayButton = ({
   inMonth,
   today,
   isPeriod,
+  isFertile,
+  isOvulation,
   hasSymptoms,
   isSelected,
   onTap,
@@ -32,6 +34,8 @@ const DayButton = ({
   inMonth: boolean;
   today: boolean;
   isPeriod: boolean;
+  isFertile: boolean;
+  isOvulation: boolean;
   hasSymptoms: boolean;
   isSelected: boolean;
   onTap: () => void;
@@ -51,21 +55,32 @@ const DayButton = ({
     }
   };
 
+  const bgClass = isPeriod
+    ? "bg-period text-period-foreground font-medium"
+    : isFertile
+      ? "bg-fertile text-fertile-foreground"
+      : inMonth
+        ? "text-foreground/70"
+        : "text-muted-foreground";
+
   return (
     <button
       type="button"
       onClick={handleClick}
       disabled={!inMonth}
       aria-pressed={isPeriod}
-      aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
+      aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${isOvulation ? ", predicted ovulation" : isFertile ? ", fertile window" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
       className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation border-2
         ${!inMonth ? "cursor-default opacity-20 border-transparent" : "cursor-pointer hover:bg-secondary/60 border-transparent"}
         ${today ? "ring-1 ring-primary/30" : ""}
         ${isSelected ? "border-primary ring-2 ring-primary" : "border-transparent"}
-        ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
+        ${bgClass}
       `}
     >
       {format(day, "d")}
+      {isOvulation && (
+        <span className="pointer-events-none absolute -top-0.5 -right-0.5 text-[9px] leading-none">🌼</span>
+      )}
       {(isPeriod || hasSymptoms) && (
         <span className={`absolute -bottom-0.5 h-1 w-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
       )}
