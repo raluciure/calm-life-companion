@@ -78,6 +78,11 @@ export default {
           active: "hsl(var(--period-active))",
           foreground: "hsl(var(--period-foreground))",
         },
+        fertile: {
+          DEFAULT: "hsl(var(--fertile))",
+          active: "hsl(var(--fertile-active))",
+          foreground: "hsl(var(--fertile-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
