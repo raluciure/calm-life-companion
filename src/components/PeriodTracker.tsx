@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths } from "date-fns";
+import { useState, useMemo } from "react";
+import { format, startOfMonth, startOfWeek, addDays, isSameMonth, isToday, addMonths, subMonths, differenceInCalendarDays, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
-import { usePeriodLogs, useTogglePeriodDay, usePeriodSymptoms, useToggleSymptom } from "@/hooks/useHealth";
+import { usePeriodLogs, useTogglePeriodDay, usePeriodSymptoms, useToggleSymptom, useAllPeriodLogs } from "@/hooks/useHealth";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 
 const SYMPTOMS = [
@@ -23,6 +23,8 @@ const DayButton = ({
   inMonth,
   today,
   isPeriod,
+  isFertile,
+  isOvulation,
   hasSymptoms,
   isSelected,
   onTap,
@@ -32,6 +34,8 @@ const DayButton = ({
   inMonth: boolean;
   today: boolean;
   isPeriod: boolean;
+  isFertile: boolean;
+  isOvulation: boolean;
   hasSymptoms: boolean;
   isSelected: boolean;
   onTap: () => void;
@@ -51,21 +55,32 @@ const DayButton = ({
     }
   };
 
+  const bgClass = isPeriod
+    ? "bg-period text-period-foreground font-medium"
+    : isFertile
+      ? "bg-fertile text-fertile-foreground"
+      : inMonth
+        ? "text-foreground/70"
+        : "text-muted-foreground";
+
   return (
     <button
       type="button"
       onClick={handleClick}
       disabled={!inMonth}
       aria-pressed={isPeriod}
-      aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
+      aria-label={`${format(day, "MMMM d")}${isPeriod ? ", period logged" : ""}${isOvulation ? ", predicted ovulation" : isFertile ? ", fertile window" : ""}${hasSymptoms ? ", symptoms logged" : ""}`}
       className={`relative flex aspect-square select-none items-center justify-center rounded-full text-[11px] font-body transition-all touch-manipulation border-2
         ${!inMonth ? "cursor-default opacity-20 border-transparent" : "cursor-pointer hover:bg-secondary/60 border-transparent"}
         ${today ? "ring-1 ring-primary/30" : ""}
         ${isSelected ? "border-primary ring-2 ring-primary" : "border-transparent"}
-        ${isPeriod ? "bg-period text-period-foreground font-medium" : inMonth ? "text-foreground/70" : "text-muted-foreground"}
+        ${bgClass}
       `}
     >
       {format(day, "d")}
+      {isOvulation && (
+        <span className="pointer-events-none absolute -top-0.5 -right-0.5 text-[9px] leading-none">🌼</span>
+      )}
       {(isPeriod || hasSymptoms) && (
         <span className={`absolute -bottom-0.5 h-1 w-1 rounded-full ${isPeriod ? "bg-period-active" : "bg-accent-foreground/40"}`} />
       )}
@@ -79,11 +94,70 @@ const PeriodTracker = () => {
   const [isSymptomsOpen, setIsSymptomsOpen] = useState(false);
   const monthStr = format(viewDate, "yyyy-MM");
   const { data: logs = [] } = usePeriodLogs(monthStr);
+  const { data: allLogs = [] } = useAllPeriodLogs();
   const { data: symptoms = [] } = usePeriodSymptoms(monthStr);
   const toggleDay = useTogglePeriodDay();
   const toggleSymptom = useToggleSymptom();
 
   const periodDates = new Set(logs.map((log) => log.date));
+
+  // Compute fertile window + ovulation across the visible month using all logged cycles
+  const { fertileDates, ovulationDates, cycleLength } = useMemo(() => {
+    const allSet = new Set(allLogs.map((l) => l.date));
+    const sorted = [...allSet].sort();
+    // Cycle starts: a logged day whose previous day is not logged
+    const cycleStarts: Date[] = sorted
+      .filter((d) => {
+        const prev = format(addDays(parseISO(d), -1), "yyyy-MM-dd");
+        return !allSet.has(prev);
+      })
+      .map((d) => parseISO(d));
+
+    // Average cycle length from consecutive starts (clamp 21-40)
+    let cycleLen = 28;
+    if (cycleStarts.length >= 2) {
+      const gaps: number[] = [];
+      for (let i = 1; i < cycleStarts.length; i++) {
+        const g = differenceInCalendarDays(cycleStarts[i], cycleStarts[i - 1]);
+        if (g >= 21 && g <= 40) gaps.push(g);
+      }
+      if (gaps.length) cycleLen = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+    }
+
+    const fertile = new Set<string>();
+    const ovulation = new Set<string>();
+    if (cycleStarts.length === 0) {
+      return { fertileDates: fertile, ovulationDates: ovulation, cycleLength: cycleLen };
+    }
+
+    // Project cycle starts forward and backward to cover the visible month
+    const monthStart = startOfMonth(viewDate);
+    const monthEnd = addDays(startOfMonth(addMonths(viewDate, 1)), -1);
+    const lastStart = cycleStarts[cycleStarts.length - 1];
+
+    // Build all relevant cycle starts (logged + predicted) from earliest known up to monthEnd + cycleLen
+    const allStarts: Date[] = [...cycleStarts];
+    let next = addDays(lastStart, cycleLen);
+    while (next <= addDays(monthEnd, cycleLen)) {
+      allStarts.push(next);
+      next = addDays(next, cycleLen);
+    }
+
+    for (const start of allStarts) {
+      const ov = addDays(start, -14);
+      // Fertile window: ovulation - 3 to ovulation + 1 (5 days)
+      for (let offset = -3; offset <= 1; offset++) {
+        const d = addDays(ov, offset);
+        if (d >= addDays(monthStart, -7) && d <= addDays(monthEnd, 7)) {
+          fertile.add(format(d, "yyyy-MM-dd"));
+        }
+      }
+      ovulation.add(format(ov, "yyyy-MM-dd"));
+    }
+
+    return { fertileDates: fertile, ovulationDates: ovulation, cycleLength: cycleLen };
+  }, [allLogs, viewDate]);
+
 
   const monthStart = startOfMonth(viewDate);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -177,6 +251,8 @@ const PeriodTracker = () => {
             const isPeriod = periodDates.has(dateStr);
             const hasSymptoms = symptomsByDate.has(dateStr);
             const isSelected = selectedDate === dateStr;
+            const isFertile = !isPeriod && fertileDates.has(dateStr);
+            const isOvulation = !isPeriod && ovulationDates.has(dateStr);
 
             return (
               <DayButton
@@ -185,6 +261,8 @@ const PeriodTracker = () => {
                 inMonth={inMonth}
                 today={today}
                 isPeriod={isPeriod}
+                isFertile={isFertile}
+                isOvulation={isOvulation}
                 hasSymptoms={hasSymptoms}
                 isSelected={isSelected}
                 onTap={() => handleSelectDate(dateStr)}
@@ -217,8 +295,23 @@ const PeriodTracker = () => {
           </div>
         </div>
 
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/50 pt-2 text-[10px] font-body text-muted-foreground/70">
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-period-active" /> Period
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-fertile-active" /> Fertile window
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="text-[10px] leading-none">🌼</span> Predicted ovulation
+          </span>
+          {allLogs.length > 0 && (
+            <span className="ml-auto italic">~{cycleLength}-day cycle</span>
+          )}
+        </div>
+
         <p className="mt-2 text-[10px] font-body italic text-muted-foreground/40">
-          Double-tap a day to log period · tap to select, then use + Symptoms
+          Double-tap a day to log period · tap to select, then use + Symptoms · fertile window is an approximation
         </p>
       </div>
 
